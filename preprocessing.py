@@ -1,61 +1,42 @@
-# import pandas as pd
-# from transformers import AutoTokenizer
-
-# # Load dataset
-# df = pd.read_csv('dataset/a-backup.csv')
-# texts = df['text'].tolist()
-
-# # Initialize tokenizer
-# tokenizer = AutoTokenizer.from_pretrained('microsoft/DialoGPT-medium')
-
-# # Tokenize and encode data
-# encodings = [tokenizer(text, return_tensors='pt') for text in texts]
-
-import re
 import pandas as pd
+import re
+import csv
 
-def preprocess_text(text):
-    # Bersihkan teks dari karakter yang tidak diinginkan
-    text = text.lower()
-    text = re.sub(r'[^a-zA-Z0-9\s]', '', text)
-    return text
+# Load dataset
+# import csv
 
-df = pd.read_csv('.dataset/a-backup.csv')
-df['text'] = df['text'].apply(preprocess_text)
-texts = df['text'].tolist()
+rows = []
+with open('aset.csv', 'r', encoding='utf-8') as f:
+    csv_reader = csv.reader(f, delimiter='|')
+    for row in csv_reader:
+        if len(row) == 2:  # Pastikan hanya mengambil baris dengan 2 kolom
+            rows.append({'question': row[0], 'answer': row[1]})
 
-from collections import Counter
+df = pd.DataFrame(rows)
 
-def build_vocab(texts):
-    words = []
-    for text in texts:
-        words.extend(text.split())
-    word_counts = Counter(words)
-    vocab = {word: idx for idx, (word, _) in enumerate(word_counts.items(), start=1)}
-    vocab['<PAD>'] = 0  # Padding token
-    return vocab
+# Function to normalize and validate data
+def normalize_and_validate(df):
+    # Normalize text function
+    def normalize_text(text):
+        text = text.lower()
+        text = re.sub(r'[^a-zA-Z\s]', '', text)
+        text = re.sub(r'\n+', ' ', text).strip()
+        return text
+    
+    # Normalize question and answer columns
+    df['question'] = df['question'].apply(normalize_text)
+    df['answer'] = df['answer'].apply(normalize_text)
+    
+    # Remove rows with empty or NaN values
+    df.dropna(inplace=True)
+    df.drop(df[df['question'] == ''].index, inplace=True)
+    df.drop(df[df['answer'] == ''].index, inplace=True)
+    
+    return df
 
-# Contoh penggunaan
-vocab = build_vocab(texts)
-def text_to_tokens(text, vocab):
-    tokens = [vocab.get(word, vocab['<PAD>']) for word in text.split()]
-    return tokens
+# Normalize and validate dataset
+df_validated = normalize_and_validate(df)
 
-# Contoh penggunaan
-tokenized_texts = [text_to_tokens(text, vocab) for text in texts]
-def tokenizer(text, vocab):
-    tokens = text_to_tokens(text, vocab)
-    return tokens
-
-def detokenizer(tokens, vocab):
-    reverse_vocab = {idx: word for word, idx in vocab.items()}
-    words = [reverse_vocab.get(token, '<UNK>') for token in tokens]
-    return ' '.join(words)
-
-# 
-# sample_text = "hello how are you"
-tokens = tokenizer(sample_text, vocab)
-print("Tokens:", tokens)
-
-detokenized_text = detokenizer(tokens, vocab)
-print("Detokenized Text:", detokenized_text)
+# Print information about the dataset after validation
+print(f"Original dataset length: {len(df)}")
+print(f"Validated dataset length: {len(df_validated)}")

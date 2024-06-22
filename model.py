@@ -55,14 +55,10 @@ def main():
     scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=5e-5, steps_per_epoch=len(dataloader), epochs=3)
 
     # Training loop
-    epochs = 3
+    epochs = 64
     for epoch in range(epochs):
         loss = train(model, dataloader, optimizer, scheduler, device)
         print(f'Epoch {epoch+1}, Loss: {loss}')
 
     # Save the model
-    model.save_pretrained('trained_model')
-
-if __name__ == '__main__':
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    main()
+    model.save_pretrained('trainining_model')
