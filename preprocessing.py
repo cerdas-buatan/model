@@ -1,42 +1,42 @@
+import tensorflow as tf
+from transformers import TFBertForSequenceClassification, BertTokenizer
+from sklearn.model_selection import train_test_split
 import pandas as pd
-import re
-import csv
 
-# Load dataset
-# import csv
+# Load the dataset
+df = pd.read_csv('./dataset/a-backup.csv')
 
-rows = []
-with open('aset.csv', 'r', encoding='utf-8') as f:
-    csv_reader = csv.reader(f, delimiter='|')
-    for row in csv_reader:
-        if len(row) == 2:  # Pastikan hanya mengambil baris dengan 2 kolom
-            rows.append({'question': row[0], 'answer': row[1]})
+# Prepare the dataset
+tokenizer = BertTokenizer.from_pretrained('indobenchmark/indobert-base-p2')
+input_ids = []
+attention_masks = []
 
-df = pd.DataFrame(rows)
+for question in df['question']:
+    encoded = tokenizer.encode_plus(question, add_special_tokens=True, max_length=64, pad_to_max_length=True, return_attention_mask=True)
+    input_ids.append(encoded['input_ids'])
+    attention_masks.append(encoded['attention_mask'])
 
-# Function to normalize and validate data
-def normalize_and_validate(df):
-    # Normalize text function
-    def normalize_text(text):
-        text = text.lower()
-        text = re.sub(r'[^a-zA-Z\s]', '', text)
-        text = re.sub(r'\n+', ' ', text).strip()
-        return text
-    
-    # Normalize question and answer columns
-    df['question'] = df['question'].apply(normalize_text)
-    df['answer'] = df['answer'].apply(normalize_text)
-    
-    # Remove rows with empty or NaN values
-    df.dropna(inplace=True)
-    df.drop(df[df['question'] == ''].index, inplace=True)
-    df.drop(df[df['answer'] == ''].index, inplace=True)
-    
-    return df
+input_ids = tf.constant(input_ids)
+attention_masks = tf.constant(attention_masks)
+labels = tf.constant(df['answer'].values)
 
-# Normalize and validate dataset
-df_validated = normalize_and_validate(df)
+# Split the dataset into training and testing sets
+train_input_ids, test_input_ids, train_attention_masks, test_attention_masks, train_labels, test_labels = train_test_split(
+    input_ids, attention_masks, labels, test_size=0.2, random_state=42)
 
-# Print information about the dataset after validation
-print(f"Original dataset length: {len(df)}")
-print(f"Validated dataset length: {len(df_validated)}")
+# Load model
+model = TFBertForSequenceClassification.from_pretrained('indobenchmark/indobert-base-p2', num_labels=len(df['answer'].unique()))
+
+# Compile the model
+model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=2e-5), 
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), 
+              metrics=['accuracy'])
+
+# Train the model
+history = model.fit([train_input_ids, train_attention_masks], train_labels, 
+                    validation_data=([test_input_ids, test_attention_masks], test_labels), 
+                    epochs=3, batch_size=32)
+
+# Save the model
+model.save_pretrained('indobert_model')
+tokenizer.save_pretrained('indobert_model')

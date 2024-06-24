@@ -1,64 +1,31 @@
-import torch
-from torch import nn, optim
-from torch.utils.data import DataLoader, Dataset
-from transformers import GPT2Tokenizer, GPT2LMHeadModel
+import tensorflow as tf
+from transformers import TFBertForSequenceClassification, BertTokenizer
 
-class TextDataset(Dataset):
-    def __init__(self, texts, tokenizer, max_length):
-        self.texts = texts
-        self.tokenizer = tokenizer
-        self.max_length = max_length
+# Load the dataset
+# Assuming the dataset is in a CSV format with 'question' and 'answer' columns
+import pandas as pd
+df = pd.read_csv('./dataset/a-backup.csv')
 
-    def __len__(self):
-        return len(self.texts)
+# Prepare the dataset
+tokenizer = BertTokenizer.from_pretrained('indobenchmark/indobert-base-p2')
+input_ids = []
+attention_masks = []
 
-    def __getitem__(self, idx):
-        encodings = self.tokenizer(self.texts[idx], truncation=True, padding='max_length', max_length=self.max_length, return_tensors='pt')
-        return encodings.input_ids[0], encodings.attention_mask[0]
+for question in df['question']:
+    encoded = tokenizer.encode_plus(question, add_special_tokens=True, max_length=64, pad_to_max_length=True, return_attention_mask=True)
+    input_ids.append(encoded['input_ids'])
+    attention_masks.append(encoded['attention_mask'])
 
-def train(model, dataloader, optimizer, scheduler, device):
-    model.train()
-    total_loss = 0
-    for batch in dataloader:
-        inputs, masks = batch
-        inputs = inputs.to(device)
-        masks = masks.to(device)
+input_ids = tf.constant(input_ids)
+attention_masks = tf.constant(attention_masks)
+labels = tf.constant(df['answer'].values)
 
-        outputs = model(input_ids=inputs, attention_mask=masks, labels=inputs)
-        loss = outputs.loss
-        loss.backward()
-        
-        optimizer.step()
-        scheduler.step()
-        optimizer.zero_grad()
-        
-        total_loss += loss.item()
-    return total_loss / len(dataloader)
+# Load model
+model = TFBertForSequenceClassification.from_pretrained('indobenchmark/indobert-base-p2')
 
-def main():
-    # Load dataset
-    import pandas as pd
-    df = pd.read_csv('dataset/a-backup.csv')
-    texts = df['text_column'].tolist()
+# Compile and train the model
+model.compile(optimizer=tf.keras.optimizers.Adam(), loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
+model.fit([input_ids, attention_masks], labels, epochs=3, batch_size=32)
 
-    # Initialize tokenizer and model
-    tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
-    model = GPT2LMHeadModel.from_pretrained('gpt2')
-    model = model.to(device)
-
-    # Create dataset and dataloader
-    dataset = TextDataset(texts, tokenizer, max_length=512)
-    dataloader = DataLoader(dataset, batch_size=8, shuffle=True)
-
-    # Training setup
-    optimizer = optim.AdamW(model.parameters(), lr=5e-5)
-    scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=5e-5, steps_per_epoch=len(dataloader), epochs=3)
-
-    # Training loop
-    epochs = 64
-    for epoch in range(epochs):
-        loss = train(model, dataloader, optimizer, scheduler, device)
-        print(f'Epoch {epoch+1}, Loss: {loss}')
-
-    # Save the model
-    model.save_pretrained('trainining_model')
+# Save the model
+model.save('indobert_model')
