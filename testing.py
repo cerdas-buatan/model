@@ -1,27 +1,29 @@
 import tensorflow as tf
 from transformers import TFBertForSequenceClassification, BertTokenizer
-import pandas as pd
+import numpy as np
 
-# Load the saved model and tokenizer
+# Load the model and tokenizer
 model_path = 'indobert_model'
 model = TFBertForSequenceClassification.from_pretrained(model_path)
 tokenizer = BertTokenizer.from_pretrained(model_path)
 
-# Define a function to generate answer based on input question
-def generate_answer(question):
+def predict_answer(question):
     # Tokenize the input question
-    inputs = tokenizer(question, return_tensors="tf")
+    encoded = tokenizer.encode_plus(question, add_special_tokens=True, max_length=64, padding='max_length', return_attention_mask=True, truncation=True)
+    input_ids = tf.constant([encoded['input_ids']])
+    attention_mask = tf.constant([encoded['attention_mask']])
     
-    # Make predictions
-    outputs = model(**inputs)
-    predicted_class = tf.argmax(outputs.logits, axis=1).numpy()[0]
+    # Make prediction
+    output = model([input_ids, attention_mask])
+    logits = output.logits
+    predicted_class = np.argmax(logits, axis=1).numpy()[0]
     
-    # Assuming labels are mapped to answers in some way
-    predicted_answer = str(predicted_class)  # Example: Just an example, replace with actual logic
-    
-    return predicted_answer
+    return predicted_class
 
-# Testing with a new question
-new_question = input("Masukkan pertanyaan Anda: ")
-predicted_answer = generate_answer(new_question)
-print(f"Predicted answer: {predicted_answer}")
+# Loop to continuously take input from the user
+while True:
+    sample_question = input("Enter a question (or type 'exit' to stop): ")
+    if sample_question.lower() == 'exit':
+        break
+    predicted_answer = predict_answer(sample_question)
+    print(f"Predicted answer for '{sample_question}': {predicted_answer}")
