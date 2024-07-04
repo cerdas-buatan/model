@@ -1,98 +1,81 @@
-import tensorflow as tf_keras
-from transformers import TFBertForSequenceClassification, BertTokenizer
+import torch
 import pandas as pd
-import re
-from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
+from transformers import BertTokenizer, BertForSequenceClassification, AdamW
+from torch.utils.data import DataLoader, TensorDataset
 from sklearn.model_selection import train_test_split
 
-# Load the dataset
-df = pd.read_csv('dataset_clean.csv', sep='|', usecols=['question', 'answer'])
+# Fungsi untuk membaca dataset
+def read_processed_dataset(file_path):
+    df = pd.read_csv(file_path, sep='|')
+    return df
 
-# Preprocessing functions
-factory = StemmerFactory()
-stemmer = factory.create_stemmer()
-
-punct_re_escape = re.compile('[%s]' % re.escape('!"#$%&()*+,./:;<=>?@[\\]^_`{|}~'))
-
-def normalize_sentence(sentence):
-    sentence = punct_re_escape.sub('', sentence.lower())
-    sentence = ' '.join(sentence.split())
-    if sentence:
-        sentence = sentence.strip().split(" ")
-        normal_sentence = " "
-        for word in sentence:
-            root_sentence = stemmer.stem(word)
-            normal_sentence += root_sentence + " "
-        return punct_re_escape.sub('', normal_sentence.strip())
-    return sentence
-
-# Clean and preprocess the dataset
-cleaned_data = []
-for index, row in df.iterrows():
-    question = normalize_sentence(str(row['question']))
-    answer = str(row['answer']).lower().replace('\n', ' ')
-
-    if len(question.split()) > 0:
-        cleaned_data.append({"question": question, "answer": answer})
-
-df_cleaned = pd.DataFrame(cleaned_data)
-
-# Tokenisasi dan persiapan data
-tokenizer = BertTokenizer.from_pretrained('indobenchmark/indobert-base-p2')
-input_ids = []
-attention_masks = []
-
-for index, row in df_cleaned.iterrows():
-    encoded = tokenizer.encode_plus(
-        row['question'],
+# Fungsi untuk mendapatkan DataLoader dari dataset
+def get_dataloader(data, tokenizer, max_length=128, batch_size=32):
+    encoded_data = tokenizer.batch_encode_plus(
+        data['question_answer'].values.tolist(),
         add_special_tokens=True,
-        max_length=64,
-        pad_to_max_length=True,
+        max_length=max_length,
         return_attention_mask=True,
-        return_tensors='tf'
+        pad_to_max_length=True,
+        return_tensors='pt'
     )
-    input_ids.append(encoded['input_ids'])
-    attention_masks.append(encoded['attention_mask'])
+    dataset = TensorDataset(
+        encoded_data['input_ids'],
+        encoded_data['attention_mask'],
+        torch.tensor(data['label'].values)  # Ganti 'label' dengan kolom target yang sesuai
+    )
+    dataloader = DataLoader(dataset, batch_size=batch_size)
+    return dataloader
 
-input_ids = tf.concat(input_ids, axis=0)
-attention_masks = tf.concat(attention_masks, axis=0)
-labels = tf.constant(df_cleaned['answer'].values)
+# Fungsi untuk training model
+def train_model(train_dataloader, model, optimizer, num_epochs=3):
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model.to(device)
+    model.train()
+    
+    for epoch in range(num_epochs):
+        total_loss = 0
+        for batch in train_dataloader:
+            input_ids, attention_mask, labels = batch
+            input_ids, attention_mask, labels = input_ids.to(device), attention_mask.to(device), labels.to(device)
+            
+            optimizer.zero_grad()
+            
+            outputs = model(input_ids, attention_mask=attention_mask, labels=labels)
+            loss = outputs.loss
+            total_loss += loss.item()
+            
+            loss.backward()
+            optimizer.step()
+        
+        avg_train_loss = total_loss / len(train_dataloader)
+        print(f'Epoch {epoch + 1}/{num_epochs}, Average Training Loss: {avg_train_loss}')
 
-# Split data menjadi train dan test set
-train_inputs, validation_inputs, train_labels, validation_labels = train_test_split(input_ids, labels, test_size=0.1)
+# Contoh penggunaan
+def main():
+    try:
+        # Path ke file dataset yang sudah dipreprocessing
+        processed_file = 'dataset_clean.csv'
+        df = read_processed_dataset(processed_file)
+        
+        # Inisialisasi tokenizer dan model BERT
+        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=2)  # Sesuaikan dengan jumlah label/target Anda
+        
+        # Bagi dataset menjadi data latih dan data validasi
+        train_df, val_df = train_test_split(df, test_size=0.2, random_state=42)
+        
+        # Dapatkan DataLoader untuk data latih
+        train_dataloader = get_dataloader(train_df, tokenizer)
+        
+        # Inisialisasi optimizer
+        optimizer = AdamW(model.parameters(), lr=2e-5, eps=1e-8)
+        
+        # Training model
+        train_model(train_dataloader, model, optimizer)
+    
+    except Exception as e:
+        print(f"Terjadi kesalahan: {e}")
 
-# Konversi ke TensorFlow Dataset
-train_dataset = tf.data.Dataset.from_tensor_slices(({'input_ids': train_inputs, 'attention_mask': attention_masks[:len(train_inputs)]}, train_labels))
-validation_dataset = tf.data.Dataset.from_tensor_slices(({'input_ids': validation_inputs, 'attention_mask': attention_masks[len(train_inputs):]}, validation_labels))
-
-# Load model
-model = TFBertForSequenceClassification.from_pretrained('indobenchmark/indobert-base-p2', num_labels=2)
-
-# Compile model
-optimizer = tf.keras.optimizers.Adam(learning_rate=3e-5)
-loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-model.compile(optimizer=optimizer, loss=loss, metrics=['accuracy'])
-
-# Train model
-epochs = 1
-batch_size = 16
-
-history = model.fit(train_dataset.shuffle(100).batch(batch_size), epochs=epochs, batch_size=batch_size, validation_data=validation_dataset.batch(batch_size))
-
-# Save the model
-model.save_pretrained('./indobert_model')
-tokenizer.save_pretrained('./indobert_model')
-
-# Function to predict answer
-def predict_answer(question):
-    question = normalize_sentence(question)
-    inputs = tokenizer(question, return_tensors="tf", max_length=64, padding="max_length", truncation=True)
-    outputs = model(inputs)
-    logits = outputs.logits
-    predicted_label = tf.argmax(logits, axis=-1).numpy()
-    return predicted_label
-
-# Example usage of prediction function
-# example_question = "Apa itu BERT?"
-# predicted_answer = predict_answer(example_question)
-# print(f"Predicted label for the question '{example_question}' is: {predicted_answer}")
+if __name__ == "__main__":
+    main()

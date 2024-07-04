@@ -209,9 +209,9 @@ def preprocess_csv(input_file, output_file):
 
 # Contoh penggunaan
 if __name__ == "__main__":
-    input_file = 'dataset-a.csv'
-    intermediate_file = 'dataset_clean.csv'
-    output_file = 'dataset_final.csv'
+    input_file = './dataset/dataset-a.csv'
+    intermediate_file = './dataset/dataset_clean.csv'
+    output_file = './dataset/dataset_final.csv'
     
     # Lakukan preprocessing pertama untuk membersihkan simbol
     preprocess_csv(input_file, intermediate_file)
