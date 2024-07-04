@@ -1,0 +1,8 @@
+numpy
+pandas
+requests
+Sastrawi
+transformers
+torch
+scikit-learn
+os
