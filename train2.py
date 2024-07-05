@@ -1,15 +1,12 @@
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.layers import Embedding, LSTM, Dense
+from tensorflow.keras.layers import Embedding, LSTM, Dense, Input
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 import os
 
 # Disable oneDNN optimizations warning
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
-
-# Use the compatible version of sparse_softmax_cross_entropy
-from tensorflow.compat.v1.losses import sparse_softmax_cross_entropy
 
 class Seq2Seq:
     def __init__(self, xseq_len, yseq_len, xvocab_size, yvocab_size, emb_dim, num_layers):
@@ -23,7 +20,7 @@ class Seq2Seq:
 
     def build_model(self):
         # Encoder
-        encoder_inputs = tf.keras.Input(shape=(self.xseq_len,), name='encoder_inputs')
+        encoder_inputs = Input(shape=(self.xseq_len,), name='encoder_inputs')
         enc_emb = Embedding(self.xvocab_size, self.emb_dim, mask_zero=True)(encoder_inputs)
         
         encoder_lstm = LSTM(self.emb_dim, return_state=True, name='encoder_lstm')
@@ -31,7 +28,7 @@ class Seq2Seq:
         encoder_states = [state_h, state_c]
 
         # Decoder
-        decoder_inputs = tf.keras.Input(shape=(self.yseq_len,), name='decoder_inputs')
+        decoder_inputs = Input(shape=(self.yseq_len,), name='decoder_inputs')
         dec_emb = Embedding(self.yvocab_size, self.emb_dim, mask_zero=True)(decoder_inputs)
 
         decoder_lstm = LSTM(self.emb_dim, return_sequences=True, return_state=True, name='decoder_lstm')
@@ -43,21 +40,16 @@ class Seq2Seq:
         # Define the model
         self.model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
         
-        # Compile the model with a custom accuracy metric
-        self.model.compile(optimizer=Adam(), loss=sparse_softmax_cross_entropy, metrics=[self.accuracy])
-
-    def accuracy(self, y_true, y_pred):
-        # Custom accuracy function to compare the true and predicted values
-        y_true = tf.argmax(y_true, axis=-1)
-        y_pred = tf.argmax(y_pred, axis=-1)
-        return tf.reduce_mean(tf.cast(tf.equal(y_true, y_pred), tf.float32))
+        # Compile the model with sparse categorical crossentropy loss and accuracy metric
+        self.model.compile(optimizer=Adam(), loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
     def train(self, X_train, y_train, batch_size, epochs):
         # Ensure y_train is in the right shape
         y_train = np.expand_dims(y_train, axis=-1)
         
         # Train the model
-        self.model.fit([X_train, y_train[:, :]], y_train[:, :], batch_size=batch_size, epochs=epochs, validation_split=0.5)
+        history = self.model.fit([X_train, y_train[:, :]], y_train[:, :], batch_size=batch_size, epochs=epochs, validation_split=0.1)
+        return history
 
     def evaluate(self, X_test, y_test):
         # Ensure y_test is in the right shape
@@ -76,7 +68,28 @@ y_test = np.random.randint(0, 1000, size=(20, 25))
 
 # Instantiate and train the model
 model = Seq2Seq(xseq_len=25, yseq_len=25, xvocab_size=1000, yvocab_size=1000, emb_dim=128, num_layers=2)
-model.train(X_train, y_train, batch_size=16, epochs=10)
+history = model.train(X_train, y_train, batch_size=16, epochs=10)
 
 # Evaluate the model
 model.evaluate(X_test, y_test)
+
+# Display training history
+import matplotlib.pyplot as plt
+
+# Plot training & validation accuracy values
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['val_accuracy'])
+plt.title('Model accuracy')
+plt.ylabel('Accuracy')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Validation'], loc='upper left')
+plt.show()
+
+# Plot training & validation loss values
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('Model loss')
+plt.ylabel('Loss')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Validation'], loc='upper left')
+plt.show()
