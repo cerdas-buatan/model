@@ -76,7 +76,7 @@ y_test = np.random.randint(0, 1000, size=(20, 25))
 
 # Instantiate and train the model
 model = Seq2Seq(xseq_len=25, yseq_len=25, xvocab_size=1000, yvocab_size=1000, emb_dim=128, num_layers=2)
-model.train(X_train, y_train, batch_size=32, epochs=10)
+model.train(X_train, y_train, batch_size=16, epochs=400)
 
 # Evaluate the model
 model.evaluate(X_test, y_test)
