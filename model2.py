@@ -1,38 +1,53 @@
 import tensorflow as tf
-from transformers import TFBertForSequenceClassification, BertTokenizer
+from transformers import TFT5ForConditionalGeneration, T5Tokenizer
 import pandas as pd
 
-# Read and clean the dataset manually
+# Initialize an empty list to store cleaned rows
 rows = []
-with open('dataset-a-NewBackup.csv', 'r', encoding='utf-8') as file:
-    for line in file:
-        if line.count('|') == 1: 
-            rows.append(line.strip())
+
+# Read and clean the dataset, handling any anomalies
+with open('dataset-a.csv', 'r', encoding='utf-8') as file:
+    for line_number, line in enumerate(file):
+        # Split line by '|' and handle any unexpected lines
+        parts = line.strip().split('|')
+        if len(parts) == 2:  # Only process lines with exactly two parts
+            rows.append(parts)
 
 # Convert cleaned rows to a DataFrame
-df = pd.DataFrame([row.split('|') for row in rows], columns=['question', 'answer'])
+df = pd.DataFrame(rows, columns=['question', 'answer'])
 
-# Prepare the dataset
-tokenizer = BertTokenizer.from_pretrained('indobenchmark/indobert-base-p2')
+# Initialize the tokenizer
+tokenizer = T5Tokenizer.from_pretrained('t5-small')
+
+# Tokenize the input and output texts
 input_ids = []
 attention_masks = []
+labels = []
 
-for question in df['question']:
-    encoded = tokenizer.encode_plus(question, add_special_tokens=True, max_length=64, padding='max_length', return_attention_mask=True, truncation=True)
-    input_ids.append(encoded['input_ids'])
-    attention_masks.append(encoded['attention_mask'])
+for question, answer in zip(df['question'], df['answer']):
+    input_encoded = tokenizer.encode_plus(question, add_special_tokens=True, max_length=64, padding='max_length', return_attention_mask=True, truncation=True)
+    output_encoded = tokenizer.encode_plus(answer, add_special_tokens=True, max_length=64, padding='max_length', return_attention_mask=True, truncation=True)
+    
+    input_ids.append(input_encoded['input_ids'])
+    attention_masks.append(input_encoded['attention_mask'])
+    labels.append(output_encoded['input_ids'])
 
+# Convert lists to tensors
 input_ids = tf.constant(input_ids)
 attention_masks = tf.constant(attention_masks)
-labels = tf.constant(df['answer'].values)
+labels = tf.constant(labels)
 
-# Load model
-model = TFBertForSequenceClassification.from_pretrained('indobenchmark/indobert-base-p2', num_labels=len(df['answer'].unique()))
+# Load the model
+model = TFT5ForConditionalGeneration.from_pretrained('t5-small')
 
-# Compile and train the model
-model.compile(optimizer=tf.keras.optimizers.Adam(), loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
-model.fit([input_ids, attention_masks], labels, epochs=3, batch_size=32)
+# Compile the model
+optimizer = tf.keras.optimizers.Adam(learning_rate=3e-5)
+model.compile(optimizer=optimizer, loss=model.compute_loss)
 
-# Save the model
-model.save_pretrained('indobert_model')
-tokenizer.save_pretrained('indobert_model')
+# Train the model
+model.fit([input_ids, attention_masks], labels, epochs=3, batch_size=8)
+
+# Save the model and tokenizer
+model_path = 't5_text_to_text_model'
+model.save_pretrained(model_path)
+tokenizer.save_pretrained(model_path)

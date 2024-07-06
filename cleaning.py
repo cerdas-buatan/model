@@ -1,109 +1,82 @@
-import tensorflow as tf
-from transformers import TFBertForSequenceClassification, BertTokenizer
 import pandas as pd
 import re
-from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
-import nltk
-from nltk.corpus import stopwords
-nltk.download('stopwords')
+import os
 
-# Stopwords dalam bahasa Indonesia
-stop_words = set(stopwords.words('indonesian'))
-
-# Kamus kata slang dan singkatan
-slang_dict = {
-    "gak": "tidak",
-    "nggak": "tidak",
-    "ga": "tidak",
-    "enggak": "tidak",
-    "tdk": "tidak",
-    "gini": "begini",
-    "gitu": "begitu",
-    "trs": "terus",
-    "tp": "tapi",
-    "sbnr": "sebenarnya",
-    "sm": "sama",
-    "sbg": "sebagai",
-    "blg": "bilang",
-    "krn": "karena",
-    "jg": "juga",
-    "aj": "saja",
-    "udh": "sudah",
-    "jd": "jadi",
-    "kyk": "seperti",
-    "dlm": "dalam"
-    # Tambahkan lebih banyak kata sesuai kebutuhan
-}
-
-# Load the dataset
-df = pd.read_csv('dataset_clean.csv', sep='|', usecols=['question', 'answer'])
-
-# Preprocessing functions
-factory = StemmerFactory()
-stemmer = factory.create_stemmer()
-
-punct_re_escape = re.compile('[%s]' % re.escape('!"#$%&()*+,./:;<=>?@[\\]^_`{|}~'))
-unknowns = ["gak paham", "kurang ngerti", "I don't know", "I don't care"]
-
-def check_normal_word(word):
-    # Mengganti kata slang dengan bentuk formal
-    if word in slang_dict:
-        word = slang_dict[word]
-    
-    # Menghapus stopwords
-    if word in stop_words:
+# Fungsi untuk membersihkan teks
+def clean_text(text):
+    if pd.isna(text):  # Periksa apakah teks adalah NaN
         return ""
+    # Mengganti kata "iteung" dengan "gays"
+    text = text.replace("iteung", "gays")
+    # Menghapus karakter yang tidak diinginkan (contoh: simbol, angka, dll.)
+    text = re.sub(r'[^A-Za-z\s]', '', text)
+    # Menghapus spasi berlebih
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
+
+# Fungsi untuk membaca semua dataset
+def get_all_datasets(file_path):
+    df = pd.read_csv(file_path)
+    return df
+
+# Fungsi untuk memperbarui dataset ke dalam file CSV
+def update_dataset_by_id(df, file_path):
+    df.to_csv(file_path, index=False)
+
+# Fungsi untuk membersihkan simbol dari jawaban
+def cleaning_data(file_path):
+    data = get_all_datasets(file_path)
     
-    return word
+    symbols = [
+        "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "+", "=", "[", "]", "{", "}",
+        ";", ":", "'", ",", ".", "<", ">", "/", "?", "\n",
+    ]
 
-def normalize_sentence(sentence):
-    sentence = punct_re_escape.sub('', sentence.lower())
-    sentence = sentence.replace('gaysdisal', '').replace('\n', '').replace(' njir','').replace('njinx','').replace(' dong','').replace(' sih','').replace(' deh','').replace(' duh','').replace(' ea','').replace(' aw','')
-    sentence = sentence.replace('gaysdisal', '')
-    sentence = re.sub(r'((wk)+(w?)+(k?)+)+', '', sentence)
-    sentence = re.sub(r'((xi)+(x?)+(i?)+)+', '', sentence)
-    sentence = re.sub(r'((h(a|i|e)h)((a|i|e)?)+(h?)+((a|i|e)?)+)+', '', sentence)
-    sentence = ' '.join(sentence.split())
-    if sentence:
-        sentence = sentence.strip().split(" ")
-        normal_sentence = " "
-        for word in sentence:
-            normalize_word = check_normal_word(word)
-            root_sentence = stemmer.stem(normalize_word)
-            normal_sentence += root_sentence + " "
-        return punct_re_escape.sub('', normal_sentence.strip())
-    return sentence
+    # Buat regex pattern untuk simbol
+    pattern = re.compile('|'.join(map(re.escape, symbols)))
 
+    for index, row in data.iterrows():
+        # Konversi jawaban menjadi string dan tangani nilai non-string
+        answers = str(row['question|answer']) if not pd.isna(row['question|answer']) else ""
 
-def check_normal_word(word):
-    # Tambahkan logika normalisasi tambahan jika diperlukan
-    return word
+        # Bersihkan simbol dari jawaban
+        cleaned_answers = re.sub(pattern, '', answers)
+        
+        # Perbarui data dengan jawaban yang telah dibersihkan
+        data.at[index, 'question|answer'] = cleaned_answers
 
-# Clean and preprocess the dataset
-cleaned_data = []
-for index, row in df.iterrows():
-    question = normalize_sentence(str(row['question']))
-    answer = str(row['answer']).lower().replace('gaysdisal', 'aku').replace('\n', ' ')
+    update_dataset_by_id(data, file_path)
+    print("Data cleaned and updated successfully.")
 
-    if len(question.split()) > 0 and len(question.split()) < 13 and len(answer.split()) < 29:
-        body = "" + question + "|" + answer + ""
-        cleaned_data.append(body)
+# Fungsi untuk melakukan preprocessing pada file CSV
+def preprocess_csv(input_file, output_file):
+    try:
+        # Periksa apakah file input ada
+        if not os.path.isfile(input_file):
+            print(f"File {input_file} tidak ditemukan.")
+            return
+        
+        # Baca file CSV
+        df = pd.read_csv(input_file, sep='|', dtype={'question': 'string', 'answer': 'string'}, low_memory=False, on_bad_lines='skip')
+        
+        # Bersihkan simbol dari kolom question dan answer
+        df['question'] = df['question'].apply(clean_text)
+        df['answer'] = df['answer'].apply(clean_text)
+        
+        # Simpan kembali ke file CSV
+        df.to_csv(output_file, sep='|', index=False)
+        print(f"Proses preprocessing selesai. Hasil disimpan di {output_file}.")
+    except Exception as e:
+        print(f"Terjadi kesalahan: {e}")
 
-# Save cleaned data to a file
-filename = './dataset/clean_qa.txt'
-with open(filename, 'w', encoding='utf-8') as f:
-    for item in cleaned_data:
-        f.write("%s\n" % item)
-
-# Load IndoBERT model and tokenizer
-tokenizer = BertTokenizer.from_pretrained('indobenchmark/indobert-base-p2')
-model = TFBertForSequenceClassification.from_pretrained('indobenchmark/indobert-base-p2')
-
-# Example of using tokenizer
-# text = "contoh kalimat untuk di-tokenisasi"
-# encoded_input = tokenizer(text, return_tensors='tf')
-
-# Save the model and tokenizer
-model.save_pretrained('./indobert_model')
-tokenizer.save_pretrained('./indobert_model')
-
+# Contoh penggunaan
+if __name__ == "__main__":
+    input_file = './dataset/dataset-a.csv'
+    intermediate_file = './dataset/dataset_clean.csv'
+    output_file = './dataset/dataset_final.csv'
+    
+    # Lakukan preprocessing pertama untuk membersihkan simbol
+    preprocess_csv(input_file, intermediate_file)
+    
+    # Lakukan preprocessing kedua untuk membersihkan nilai NaN dan simbol
+    cleaning_data(intermediate_file)
