@@ -26,7 +26,7 @@ class QADataset(Dataset):
     
     def __getitem__(self, idx):
         source_text = self.data.iloc[idx]['question|answer']
-        target_text = self.data.iloc[idx]['target_text']  # Ganti dengan kolom yang sesuai
+        target_text = self.data.iloc[idx]['question|answer']  # Ganti dengan kolom yang sesuai
         source = self.tokenizer.encode_plus(source_text, max_length=self.max_source_length, padding='max_length', truncation=True, return_tensors='pt')
         target = self.tokenizer.encode_plus(target_text, max_length=self.max_target_length, padding='max_length', truncation=True, return_tensors='pt')
         return {
@@ -62,9 +62,17 @@ for epoch in range(epochs):
     model.train()
     total_train_loss = 0
     for batch in train_loader:
-        batch = {k: v.to(device) for k, v in batch.items()}
+        input_ids = batch['input_ids'].to(device)
+        attention_mask = batch['attention_mask'].to(device)
+        labels = batch['labels'].to(device)
+        decoder_attention_mask = batch['decoder_attention_mask'].to(device)
+        
         optimizer.zero_grad()
-        outputs = model(**batch, labels=batch['labels'])
+        outputs = model(input_ids=input_ids,
+                        attention_mask=attention_mask,
+                        labels=labels,
+                        decoder_attention_mask=decoder_attention_mask)
+        
         loss = outputs.loss
         total_train_loss += loss.item()
         loss.backward()
@@ -77,9 +85,17 @@ for epoch in range(epochs):
     model.eval()
     total_eval_loss = 0
     for batch in test_loader:
-        batch = {k: v.to(device) for k, v in batch.items()}
+        input_ids = batch['input_ids'].to(device)
+        attention_mask = batch['attention_mask'].to(device)
+        labels = batch['labels'].to(device)
+        decoder_attention_mask = batch['decoder_attention_mask'].to(device)
+        
         with torch.no_grad():
-            outputs = model(**batch, labels=batch['labels'])
+            outputs = model(input_ids=input_ids,
+                            attention_mask=attention_mask,
+                            labels=labels,
+                            decoder_attention_mask=decoder_attention_mask)
+        
         loss = outputs.loss
         total_eval_loss += loss.item()
     
