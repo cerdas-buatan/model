@@ -1,106 +1,58 @@
+import tensorflow as tf
+from transformers import TFT5ForConditionalGeneration, T5Tokenizer
 import pandas as pd
-from transformers import T5Tokenizer, T5ForConditionalGeneration, AdamW
-import torch
-from torch.utils.data import DataLoader, Dataset
-from sklearn.model_selection import train_test_split
 
-# Baca dataset
-df = pd.read_csv('dataset_clean.csv')
+# Initialize an empty list to store cleaned rows
+rows = []
 
-# Split dataset menjadi data latih dan data uji
-train_df, test_df = train_test_split(df, test_size=0.2, random_state=42)
+# Read and clean the dataset, handling any anomalies
+with open('dataset-a.csv', 'r', encoding='utf-8') as file:
+    for line_number, line in enumerate(file):
+        # Split line by '|' and handle any unexpected lines
+        parts = line.strip().split('|')
+        if len(parts) == 2:  # Only process lines with exactly two parts
+            rows.append(parts)
 
-# Inisialisasi tokenizer T5
+# Convert cleaned rows to a DataFrame
+df = pd.DataFrame(rows, columns=['question', 'answer'])
+
+# Initialize the tokenizer
 tokenizer = T5Tokenizer.from_pretrained('t5-small')
 
-# Buat dataset untuk teks-to-teks
-class QADataset(Dataset):
-    def __init__(self, data, tokenizer, max_source_length=512, max_target_length=32):
-        self.data = data
-        self.tokenizer = tokenizer
-        self.max_source_length = max_source_length
-        self.max_target_length = max_target_length
-        
-    def __len__(self):
-        return len(self.data)
-    
-    def __getitem__(self, idx):
-        source_text = self.data.iloc[idx]['question|answer']
-        target_text = self.data.iloc[idx]['question|answer']  # Ganti dengan kolom yang sesuai
-        source = self.tokenizer.encode_plus(source_text, max_length=self.max_source_length, padding='max_length', truncation=True, return_tensors='pt')
-        target = self.tokenizer.encode_plus(target_text, max_length=self.max_target_length, padding='max_length', truncation=True, return_tensors='pt')
-        return {
-            'input_ids': source['input_ids'].flatten(),
-            'attention_mask': source['attention_mask'].flatten(),
-            'labels': target['input_ids'].flatten(),
-            'decoder_attention_mask': target['attention_mask'].flatten()
-        }
+# Tokenize the input and output sequences
+input_ids = []
+attention_masks = []
+decoder_input_ids = []
+decoder_attention_masks = []
 
-# Buat dataset untuk training dan testing
-train_dataset = QADataset(train_df, tokenizer)
-test_dataset = QADataset(test_df, tokenizer)
+for index, row in df.iterrows():
+    encoded_input = tokenizer.encode_plus(row['question'], add_special_tokens=True, max_length=64, padding='max_length', return_attention_mask=True, truncation=True)
+    encoded_output = tokenizer.encode_plus(row['answer'], add_special_tokens=True, max_length=64, padding='max_length', return_attention_mask=True, truncation=True)
 
-# Tentukan batch size
-batch_size = 16
+    input_ids.append(encoded_input['input_ids'])
+    attention_masks.append(encoded_input['attention_mask'])
+    decoder_input_ids.append(encoded_output['input_ids'])
+    decoder_attention_masks.append(encoded_output['attention_mask'])
 
-# Buat DataLoader untuk data latih dan data uji
-train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+input_ids = tf.constant(input_ids)
+attention_masks = tf.constant(attention_masks)
+decoder_input_ids = tf.constant(decoder_input_ids)
+decoder_attention_masks = tf.constant(decoder_attention_masks)
 
-# Inisialisasi model T5 untuk fine-tuning
-model = T5ForConditionalGeneration.from_pretrained('t5-small')
+# Load the sequence-to-sequence model
+model = TFT5ForConditionalGeneration.from_pretrained('t5-small')
 
-# Pilih optimizer
-optimizer = AdamW(model.parameters(), lr=2e-5)
+# Define the optimizer and loss function
+optimizer = tf.keras.optimizers.Adam(learning_rate=5e-5)
+loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 
-# Training loop
-epochs = 3
-device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-model.to(device)
+# Compile the model
+model.compile(optimizer=optimizer, loss=loss, metrics=['accuracy'])
 
-for epoch in range(epochs):
-    model.train()
-    total_train_loss = 0
-    for batch in train_loader:
-        input_ids = batch['input_ids'].to(device)
-        attention_mask = batch['attention_mask'].to(device)
-        labels = batch['labels'].to(device)
-        decoder_attention_mask = batch['decoder_attention_mask'].to(device)
-        
-        optimizer.zero_grad()
-        outputs = model(input_ids=input_ids,
-                        attention_mask=attention_mask,
-                        labels=labels,
-                        decoder_attention_mask=decoder_attention_mask)
-        
-        loss = outputs.loss
-        total_train_loss += loss.item()
-        loss.backward()
-        optimizer.step()
-    
-    avg_train_loss = total_train_loss / len(train_loader)
-    print(f'Epoch {epoch + 1}/{epochs}, Average Training Loss: {avg_train_loss}')
-    
-    # Evaluasi setiap epoch
-    model.eval()
-    total_eval_loss = 0
-    for batch in test_loader:
-        input_ids = batch['input_ids'].to(device)
-        attention_mask = batch['attention_mask'].to(device)
-        labels = batch['labels'].to(device)
-        decoder_attention_mask = batch['decoder_attention_mask'].to(device)
-        
-        with torch.no_grad():
-            outputs = model(input_ids=input_ids,
-                            attention_mask=attention_mask,
-                            labels=labels,
-                            decoder_attention_mask=decoder_attention_mask)
-        
-        loss = outputs.loss
-        total_eval_loss += loss.item()
-    
-    avg_val_loss = total_eval_loss / len(test_loader)
-    print(f'Epoch {epoch + 1}/{epochs}, Validation Loss: {avg_val_loss}')
+# Train the model
+model.fit([input_ids, attention_masks, decoder_input_ids, decoder_attention_masks], decoder_input_ids, epochs=5, batch_size=400)
 
-# Simpan model setelah pelatihan
-model.save_pretrained('output_dir/model_t5')
+# Save the model and tokenizer
+model_path = 't5_text_to_text_model'
+model.save_pretrained(model_path)
+tokenizer.save_pretrained(model_path)

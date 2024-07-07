@@ -1,29 +1,42 @@
 import tensorflow as tf
-from transformers import TFBertForSequenceClassification, BertTokenizer
-import numpy as np
+from transformers import TFT5ForConditionalGeneration, T5Tokenizer
+import re
 
-# Load the model and tokenizer
-model_path = 'indobert_model'
-model = TFBertForSequenceClassification.from_pretrained(model_path)
-tokenizer = BertTokenizer.from_pretrained(model_path)
+# Load the trained model and tokenizer
+model_path = 't5_text_to_text_model'
+model = TFT5ForConditionalGeneration.from_pretrained(model_path)
+tokenizer = T5Tokenizer.from_pretrained(model_path)
 
-def predict_answer(question):
-    # Tokenize the input question
-    encoded = tokenizer.encode_plus(question, add_special_tokens=True, max_length=64, padding='max_length', return_attention_mask=True, truncation=True)
-    input_ids = tf.constant([encoded['input_ids']])
-    attention_mask = tf.constant([encoded['attention_mask']])
-    
-    # Make prediction
-    output = model([input_ids, attention_mask])
-    logits = output.logits
-    predicted_class = np.argmax(logits, axis=1).numpy()[0]
-    
-    return predicted_class
+# Function to clean and preprocess input text
+def preprocess_text(text):
+    # Remove repetitive characters
+    text = re.sub(r'(.)\1{2,}', r'\1', text)
+    return text
 
-# Loop to continuously take input from the user
+# Function to generate text from input
+def generate_text(input_text):
+    # Preprocess the input text
+    input_text = preprocess_text(input_text)
+
+    # Tokenize the input text
+    input_ids = tokenizer.encode(input_text, return_tensors='tf', add_special_tokens=True, max_length=64, padding='max_length', truncation=True)
+
+    # Generate text from the model
+    outputs = model.generate(input_ids, max_length=64, num_beams=4, early_stopping=True)
+
+    # Decode the generated output
+    output_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+    return output_text
+
+# Testing loop
 while True:
-    sample_question = input("Enter a question (or type 'exit' to stop): ")
-    if sample_question.lower() == 'exit':
+    input_text = input("Masukkan pertanyaan Anda (atau ketik 'exit' untuk keluar): ")
+
+    if input_text.lower() == 'exit':
         break
-    predicted_answer = predict_answer(sample_question)
-    print(f"Predicted answer for '{sample_question}': {predicted_answer}")
+
+    # Generate text based on input
+    generated_text = generate_text(input_text)
+    print("Jawaban dari model:")
+    print(generated_text)
