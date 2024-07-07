@@ -1,7 +1,9 @@
 numpy
 pandas
-requests
-Sastrawi
+# requests
+# Sastrawi
+tensorflow
 transformers
 torch
 scikit-learn
+tf-keras

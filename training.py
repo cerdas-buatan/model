@@ -1,185 +1,58 @@
-# import torch
-# import pandas as pd
-# from transformers import BertTokenizer, BertForSequenceClassification, AdamW
-# from torch.utils.data import DataLoader, TensorDataset
-# from sklearn.model_selection import train_test_split
-
-# # Fungsi untuk membaca dataset
-# def read_processed_dataset(file_path):
-#     df = pd.read_csv(file_path, sep='|')
-#     return df
-
-# # Fungsi untuk mendapatkan DataLoader dari dataset
-# def get_dataloader(data, tokenizer, max_length=128, batch_size=32):
-#     encoded_data = tokenizer.batch_encode_plus(
-#         data['question_answer'].values.tolist(),
-#         add_special_tokens=True,
-#         max_length=max_length,
-#         return_attention_mask=True,
-#         pad_to_max_length=True,
-#         return_tensors='pt'
-#     )
-#     dataset = TensorDataset(
-#         encoded_data['input_ids'],
-#         encoded_data['attention_mask'],
-#         torch.tensor(data['label'].values)  # Ganti 'label' dengan kolom target yang sesuai
-#     )
-#     dataloader = DataLoader(dataset, batch_size=batch_size)
-#     return dataloader
-
-# # Fungsi untuk training model
-# def train_model(train_dataloader, model, optimizer, num_epochs=3):
-#     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-#     model.to(device)
-#     model.train()
-    
-#     for epoch in range(num_epochs):
-#         total_loss = 0
-#         for batch in train_dataloader:
-#             input_ids, attention_mask, labels = batch
-#             input_ids, attention_mask, labels = input_ids.to(device), attention_mask.to(device), labels.to(device)
-            
-#             optimizer.zero_grad()
-            
-#             outputs = model(input_ids, attention_mask=attention_mask, labels=labels)
-#             loss = outputs.loss
-#             total_loss += loss.item()
-            
-#             loss.backward()
-#             optimizer.step()
-        
-#         avg_train_loss = total_loss / len(train_dataloader)
-#         print(f'Epoch {epoch + 1}/{num_epochs}, Average Training Loss: {avg_train_loss}')
-
-# # Contoh penggunaan
-# def main():
-#     try:
-#         # Path ke file dataset yang sudah dipreprocessing
-#         processed_file = 'dataset_clean.csv'
-#         df = read_processed_dataset(processed_file)
-        
-#         # Inisialisasi tokenizer dan model BERT
-#         tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-#         model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=2)  # Sesuaikan dengan jumlah label/target Anda
-        
-#         # Bagi dataset menjadi data latih dan data validasi
-#         train_df, val_df = train_test_split(df, test_size=0.2, random_state=42)
-        
-#         # Dapatkan DataLoader untuk data latih
-#         train_dataloader = get_dataloader(train_df, tokenizer)
-        
-#         # Inisialisasi optimizer
-#         optimizer = AdamW(model.parameters(), lr=2e-5, eps=1e-8)
-        
-#         # Training model
-#         train_model(train_dataloader, model, optimizer)
-    
-#     except Exception as e:
-#         print(f"Terjadi kesalahan: {e}")
-
-# if __name__ == "__main__":
-#     main()
-
-
-
-
-
-# tester kedua
+import tensorflow as tf
+from transformers import TFBertForSequenceToSequenceLM, BertTokenizer
 import pandas as pd
-from transformers import BertTokenizer, BertForSequenceClassification, AdamW
-import torch
-from torch.utils.data import DataLoader, TensorDataset
-from sklearn.model_selection import train_test_split
 
-# Baca dataset
-df = pd.read_csv('dataset_clean.csv')
+# Initialize an empty list to store cleaned rows
+rows = []
 
-# Tambahkan kolom label sesuai dengan kebutuhan
-df['label'] = [0] * len(df)  # Ganti dengan label yang sesuai
+# Read and clean the dataset, handling any anomalies
+with open('dataset.csv', 'r', encoding='utf-8') as file:
+    for line_number, line in enumerate(file):
+        # Split line by '|' and handle any unexpected lines
+        parts = line.strip().split('|')
+        if len(parts) == 2:  # Only process lines with exactly two parts
+            rows.append(parts)
 
-# Split dataset menjadi data latih dan data uji
-train_df, test_df = train_test_split(df, test_size=0.2, random_state=42)
+# Convert cleaned rows to a DataFrame
+df = pd.DataFrame(rows, columns=['question', 'answer'])
 
-# Inisialisasi tokenizer BERT
-tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+# Initialize the tokenizer
+tokenizer = BertTokenizer.from_pretrained('indobenchmark/indobert-base-p2')
 
-# Tokenisasi teks menggunakan tokenizer BERT
-train_encodings = tokenizer(train_df['question|answer'].tolist(), truncation=True, padding=True)
-test_encodings = tokenizer(test_df['question|answer'].tolist(), truncation=True, padding=True)
+# Tokenize the input and output sequences
+input_ids = []
+attention_masks = []
+decoder_input_ids = []
+decoder_attention_masks = []
 
-# Buat dataset Tensor untuk PyTorch
-train_dataset = TensorDataset(
-    torch.tensor(train_encodings['input_ids']),
-    torch.tensor(train_encodings['attention_mask']),
-    torch.tensor(train_df['label'].tolist())
-)
+for index, row in df.iterrows():
+    encoded_input = tokenizer.encode_plus(row['question'], add_special_tokens=True, max_length=64, padding='max_length', return_attention_mask=True, truncation=True)
+    encoded_output = tokenizer.encode_plus(row['answer'], add_special_tokens=True, max_length=64, padding='max_length', return_attention_mask=True, truncation=True)
 
-test_dataset = TensorDataset(
-    torch.tensor(test_encodings['input_ids']),
-    torch.tensor(test_encodings['attention_mask']),
-    torch.tensor(test_df['label'].tolist())
-)
+    input_ids.append(encoded_input['input_ids'])
+    attention_masks.append(encoded_input['attention_mask'])
+    decoder_input_ids.append(encoded_output['input_ids'])
+    decoder_attention_masks.append(encoded_output['attention_mask'])
 
-# Tentukan batch size
-batch_size = 16
+input_ids = tf.constant(input_ids)
+attention_masks = tf.constant(attention_masks)
+decoder_input_ids = tf.constant(decoder_input_ids)
+decoder_attention_masks = tf.constant(decoder_attention_masks)
 
-# Buat DataLoader untuk data latih dan data uji
-train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+# Load the sequence-to-sequence model
+model = TFBertForSequenceToSequenceLM.from_pretrained('indobenchmark/indobert-base-p2')
 
-# Inisialisasi model BERT untuk fine-tuning
-model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=2)  # Sesuaikan dengan jumlah label/target Anda
+# Define the optimizer and loss function
+optimizer = tf.keras.optimizers.Adam(learning_rate=5e-5)
+loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 
-# Pilih optimizer
-optimizer = AdamW(model.parameters(), lr=2e-5)
+# Compile the model
+model.compile(optimizer=optimizer, loss=loss)
 
-# Fungsi untuk evaluasi
-def evaluate(model, dataloader):
-    model.eval()
-    total_eval_accuracy = 0
-    total_eval_loss = 0
-    nb_eval_steps = 0
-    
-    for batch in dataloader:
-        batch = tuple(t.to(device) for t in batch)
-        inputs = {'input_ids': batch[0], 'attention_mask': batch[1], 'labels': batch[2]}
-        with torch.no_grad():        
-            outputs = model(**inputs)
-        loss, logits = outputs.loss, outputs.logits
-        total_eval_loss += loss.item()
-        logits = logits.detach().cpu().numpy()
-        label_ids = inputs['labels'].to('cpu').numpy()
-        total_eval_accuracy += (logits.argmax(axis=-1) == label_ids).mean()
-    
-    avg_val_accuracy = total_eval_accuracy / len(dataloader)
-    avg_val_loss = total_eval_loss / len(dataloader)
-    return avg_val_accuracy, avg_val_loss
+# Train the model
+model.fit([input_ids, attention_masks, decoder_input_ids, decoder_attention_masks], decoder_input_ids, epochs=3, batch_size=32)
 
-# Tentukan device (GPU jika tersedia)
-device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-model.to(device)
-
-# Training loop
-epochs = 3
-for epoch in range(epochs):
-    model.train()
-    total_train_loss = 0
-    for batch in train_loader:
-        batch = tuple(t.to(device) for t in batch)
-        inputs = {'input_ids': batch[0], 'attention_mask': batch[1], 'labels': batch[2]}
-        optimizer.zero_grad()
-        outputs = model(**inputs)
-        loss = outputs.loss
-        total_train_loss += loss.item()
-        loss.backward()
-        optimizer.step()
-    
-    avg_train_loss = total_train_loss / len(train_loader)
-    print(f'Epoch {epoch + 1}/{epochs}, Average Training Loss: {avg_train_loss}')
-    
-    # Evaluasi setiap epoch
-    val_accuracy, val_loss = evaluate(model, test_loader)
-    print(f'Epoch {epoch + 1}/{epochs}, Validation Accuracy: {val_accuracy}, Validation Loss: {val_loss}')
-
-# Simpan model setelah pelatihan
-model.save_pretrained('output_dir/model_bert')
+# Save the model and tokenizer
+model_path = 'indobert_text_to_text_model'
+model.save_pretrained(model_path)
+tokenizer.save_pretrained(model_path)
