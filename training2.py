@@ -50,7 +50,7 @@ loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 model.compile(optimizer=optimizer, loss=loss, metrics=['accuracy'])
 
 # Train the model
-model.fit([input_ids, attention_masks, decoder_input_ids, decoder_attention_masks], decoder_input_ids, epochs=1, batch_size=500)
+model.fit([input_ids, attention_masks, decoder_input_ids, decoder_attention_masks], decoder_input_ids, epochs=5, batch_size=400)
 
 # Save the model and tokenizer
 model_path = 't5_text_to_text_model'
