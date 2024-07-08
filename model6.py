@@ -17,7 +17,7 @@ with open('./dataset/dataset_sample.csv', 'r', encoding='utf-8') as file:
 df = pd.DataFrame(rows, columns=['question', 'answer'])
 
 # Initialize the tokenizer
-tokenizer = T5Tokenizer.from_pretrained('t5-small')
+tokenizer = T5Tokenizer.from_pretrained('t5-small', legacy=False)
 
 # Tokenize the input and output sequences
 input_ids = []
@@ -42,19 +42,33 @@ decoder_attention_masks = tf.constant(decoder_attention_masks)
 # Load the sequence-to-sequence model
 model = TFT5ForConditionalGeneration.from_pretrained('t5-small')
 
-# Define the optimizer and loss function
+# Define the optimizer
 optimizer = tf.keras.optimizers.Adam(learning_rate=5e-5)
-loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+
+# Define the loss function
+def custom_loss(y_true, y_pred):
+    y_true = y_true[:, 1:]  # Shift left the true labels
+    y_pred = y_pred[:, :-1]  # Remove the last token prediction
+    loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+    return loss_fn(y_true, y_pred)
 
 # Compile the model
-model.compile(optimizer=optimizer, loss=loss, metrics=['accuracy'])
+model.compile(optimizer=optimizer, loss=custom_loss)
+
+# Prepare the dataset
+dataset = tf.data.Dataset.from_tensor_slices((
+    {'input_ids': input_ids, 'attention_mask': attention_masks, 'decoder_input_ids': decoder_input_ids, 'decoder_attention_mask': decoder_attention_masks},
+    decoder_input_ids
+))
+
+# Batch and shuffle the dataset
+batch_size = 8
+dataset = dataset.shuffle(buffer_size=1024).batch(batch_size)
 
 # Train the model
 model.fit(
-    [input_ids, attention_masks, decoder_input_ids, decoder_attention_masks],
-    decoder_input_ids,
-    epochs=10,
-    batch_size=8  # Adjust batch size based on your GPU memory and dataset size
+    dataset,
+    epochs=10
 )
 
 # Save the model and tokenizer
