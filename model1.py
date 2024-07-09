@@ -139,4 +139,3 @@ plt.show()
 # model.add_data(X_new, y_new)
 
 # Retrain the model with new data
-# history_new = model.train(X_train, y_train, batch_size=16, epochs=20)
