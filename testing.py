@@ -76,9 +76,17 @@ test_accuracy = test_accuracy_metric.result()
 print(f"Test accuracy: {test_accuracy:.4f}")
 
 # Interactive loop to get user input and predict
+results = []
 while True:
     question = input("Enter a question (or 'exit' to quit): ")
     if question.lower() == 'exit':
         break
     answer = predict(question)
+    results.append({'Question': question, 'Predicted Answer': answer})
     print(f"Predicted Answer: {answer}")
+
+# Save results to Excel
+results_df = pd.DataFrame(results)
+results_df.to_excel('./predicted_answers.xlsx', index=False)
+
+print("Predicted answers saved to predicted_answers.xlsx")
