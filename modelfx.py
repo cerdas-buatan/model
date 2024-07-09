@@ -6,7 +6,7 @@ import pandas as pd
 rows = []
 
 # Read and clean the dataset, handling any anomalies
-with open('dataset_clean2.csv', 'r', encoding='utf-8') as file:
+with open('./dataset/dataset_clean2.csv', 'r', encoding='utf-8') as file:
     for line_number, line in enumerate(file):
         # Split line by '|' and handle any unexpected lines
         parts = line.strip().split('|')
