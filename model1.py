@@ -94,7 +94,7 @@ def preprocess_data(questions, answers, xseq_len, yseq_len, num_words):
     return X, y, tokenizer
 
 # Set the parameters
-xseq_len = 20
+xseq_len = 23
 yseq_len = 23
 num_words = 10000
 emb_dim = 128
