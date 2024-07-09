@@ -96,7 +96,7 @@ def preprocess_data(questions, answers, xseq_len, yseq_len, num_words):
 # Set the parameters
 xseq_len = 20
 yseq_len = 25
-num_words = 1000
+num_words = 10000
 emb_dim = 128
 num_layers = 1
 
