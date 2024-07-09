@@ -109,7 +109,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 
 # Instantiate and train the model
 model = Seq2Seq(xseq_len=xseq_len, yseq_len=yseq_len, xvocab_size=num_words, yvocab_size=num_words, emb_dim=emb_dim, num_layers=num_layers)
-history = model.train(X_train, y_train, batch_size=16, epochs=100)
+history = model.train(X_train, y_train, batch_size=5, epochs=100)
 
 # Evaluate the model
 model.evaluate(X_test, y_test)
