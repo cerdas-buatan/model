@@ -1,5 +1,5 @@
 import tensorflow as tf
-from transformers import TFT5ForConditionalGeneration, T5Tokenizer
+from transformers import GPT2Tokenizer, TFGPT2LMHeadModel
 import pandas as pd
 
 # Initialize an empty list to store cleaned rows
@@ -17,61 +17,41 @@ with open('./dataset/dataset_sample.csv', 'r', encoding='utf-8') as file:
 df = pd.DataFrame(rows, columns=['question', 'answer'])
 
 # Initialize the tokenizer
-tokenizer = T5Tokenizer.from_pretrained('t5-small', legacy=False)
+tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+tokenizer.pad_token = tokenizer.eos_token  # Ensure that the padding token is set to the EOS token
 
 # Tokenize the input and output sequences
 input_ids = []
 attention_masks = []
-decoder_input_ids = []
-decoder_attention_masks = []
 
 for index, row in df.iterrows():
-    encoded_input = tokenizer.encode_plus(row['question'], add_special_tokens=True, max_length=64, padding='max_length', return_attention_mask=True, truncation=True)
-    encoded_output = tokenizer.encode_plus(row['answer'], add_special_tokens=True, max_length=64, padding='max_length', return_attention_mask=True, truncation=True)
+    encoded_input = tokenizer.encode_plus(row['question'] + tokenizer.eos_token + row['answer'], 
+                                          add_special_tokens=True, 
+                                          max_length=128, 
+                                          padding='max_length', 
+                                          return_attention_mask=True, 
+                                          truncation=True)
 
     input_ids.append(encoded_input['input_ids'])
     attention_masks.append(encoded_input['attention_mask'])
-    decoder_input_ids.append(encoded_output['input_ids'])
-    decoder_attention_masks.append(encoded_output['attention_mask'])
 
 input_ids = tf.constant(input_ids)
 attention_masks = tf.constant(attention_masks)
-decoder_input_ids = tf.constant(decoder_input_ids)
-decoder_attention_masks = tf.constant(decoder_attention_masks)
 
-# Load the sequence-to-sequence model
-model = TFT5ForConditionalGeneration.from_pretrained('t5-small')
+# Load the GPT-2 model
+model = TFGPT2LMHeadModel.from_pretrained('gpt2')
 
-# Define the optimizer
+# Define the optimizer and loss function
 optimizer = tf.keras.optimizers.Adam(learning_rate=5e-5)
-
-# Define the loss function
-def custom_loss(y_true, y_pred):
-    y_true = y_true[:, 1:]  # Shift left the true labels
-    y_pred = y_pred[:, :-1]  # Remove the last token prediction
-    loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-    return loss_fn(y_true, y_pred)
+loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 
 # Compile the model
-model.compile(optimizer=optimizer, loss=custom_loss)
-
-# Prepare the dataset
-dataset = tf.data.Dataset.from_tensor_slices((
-    {'input_ids': input_ids, 'attention_mask': attention_masks, 'decoder_input_ids': decoder_input_ids, 'decoder_attention_mask': decoder_attention_masks},
-    decoder_input_ids
-))
-
-# Batch and shuffle the dataset
-batch_size = 8
-dataset = dataset.shuffle(buffer_size=1024).batch(batch_size)
+model.compile(optimizer=optimizer, loss=loss, metrics=['accuracy'])
 
 # Train the model
-model.fit(
-    dataset,
-    epochs=10
-)
+model.fit([input_ids, attention_masks], input_ids, epochs=10, batch_size=1)
 
 # Save the model and tokenizer
-model_path = 't5_text_to_text_model'
+model_path = 'gpt2_text_to_text_model'
 model.save_pretrained(model_path)
 tokenizer.save_pretrained(model_path)
