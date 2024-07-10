@@ -44,11 +44,11 @@ model = TFT5ForConditionalGeneration.from_pretrained('t5-small')
 
 # Define the optimizer
 optimizer = tf.keras.optimizers.Adam(learning_rate=5e-5)
-
+  
 # Define a custom loss function
 def compute_loss(labels, logits):
     return tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
-
+  
 # Define a custom accuracy function
 def masked_accuracy(y_true, y_pred):
     y_true = tf.cast(tf.reshape(y_true, (-1,)), tf.int64)
@@ -61,7 +61,7 @@ def masked_accuracy(y_true, y_pred):
 
 # Compile the model with the custom accuracy metric
 model.compile(optimizer=optimizer, loss=compute_loss, metrics=[masked_accuracy])
-
+  
 # Create a tf.data.Dataset
 dataset = tf.data.Dataset.from_tensor_slices((
     {
@@ -71,15 +71,11 @@ dataset = tf.data.Dataset.from_tensor_slices((
     },
     labels
 )).batch(30)
-
+  
 # Train the model for more epochs
 model.fit(dataset, epochs=100)
-
+  
 # Save the model and tokenizer
 model_path = 't5_text_to_text_model'
 model.save_pretrained(model_path)
 tokenizer.save_pretrained(model_path)
-     
-    
-   
-     
