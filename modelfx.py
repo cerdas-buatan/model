@@ -1,10 +1,10 @@
 import tensorflow as tf
 from transformers import TFT5ForConditionalGeneration, T5Tokenizer
 import pandas as pd
-
+  
 # Initialize an empty list to store cleaned rows
 rows = []
-
+  
 # Read and clean the dataset, handling any anomalies
 with open('./dataset/dataset_clean2.csv', 'r', encoding='utf-8') as file:
     for line_number, line in enumerate(file):
@@ -12,18 +12,18 @@ with open('./dataset/dataset_clean2.csv', 'r', encoding='utf-8') as file:
         parts = line.strip().split('|')
         if len(parts) == 2:  # Only process lines with exactly two parts
             rows.append(parts)
-
+  
 # Convert cleaned rows to a DataFrame
 df = pd.DataFrame(rows, columns=['question', 'answer'])
-
+  
 # Initialize the tokenizer
 tokenizer = T5Tokenizer.from_pretrained('t5-small')
-
+  
 # Tokenize the input and output sequences
 input_ids = []
 attention_masks = []
 labels = []
-
+  
 for index, row in df.iterrows():
     encoded_input = tokenizer.encode_plus(row['question'], add_special_tokens=True, max_length=64, padding='max_length', return_attention_mask=True, truncation=True)
     encoded_output = tokenizer.encode_plus(row['answer'], add_special_tokens=True, max_length=64, padding='max_length', return_attention_mask=True, truncation=True)
