@@ -66,3 +66,14 @@ class Seq2Seq:
         global X_train, y_train
         X_train = np.vstack((X_train, X_new))
         y_train = np.vstack((y_train, y_new))
+        # Load and preprocess the dataset
+data = pd.read_csv('dataset_clean2.csv', sep='|')
+
+# Ensure all data in 'question' and 'answer' columns are strings and handle missing values
+data['question'] = data['question'].astype(str).fillna('')
+data['answer'] = data['answer'].astype(str).fillna('')
+
+questions = data['question'].values
+answers = data['answer'].values
+
+
