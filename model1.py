@@ -94,11 +94,11 @@ def preprocess_data(questions, answers, xseq_len, yseq_len, num_words):
     return X, y, tokenizer
 
 # Set the parameters
-xseq_len = 23
-yseq_len = 23
-num_words = 10000
-emb_dim = 128
-num_layers = 1
+xseq_len = 10
+yseq_len = 10
+num_words = 10000  
+emb_dim = 100
+num_layers = 2
 
 # Preprocess the data
 X, y, tokenizer = preprocess_data(questions, answers, xseq_len, yseq_len, num_words)
@@ -109,7 +109,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 
 # Instantiate and train the model
 model = Seq2Seq(xseq_len=xseq_len, yseq_len=yseq_len, xvocab_size=num_words, yvocab_size=num_words, emb_dim=emb_dim, num_layers=num_layers)
-history = model.train(X_train, y_train, batch_size=5, epochs=100)
+history = model.train(X_train, y_train, batch_size=9, epochs=50)
 
 # Evaluate the model
 model.evaluate(X_test, y_test)
@@ -136,6 +136,3 @@ plt.show()
 # Add new data (if any)
 # X_new = ...
 # y_new = ...
-# model.add_data(X_new, y_new)
-
-# Retrain the model with new data
