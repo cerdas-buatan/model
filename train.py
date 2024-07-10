@@ -51,7 +51,18 @@ val_inputs_idx, test_inputs_idx, val_masks_idx, test_masks_idx, val_labels_idx, 
     temp_inputs_idx, temp_masks_idx, temp_labels_idx, test_size=0.5, random_state=42
 )
 
-# Convert to tensors
+# Convert indices to TensorFlow tensors
+train_inputs_idx = tf.constant(train_inputs_idx)
+val_inputs_idx = tf.constant(val_inputs_idx)
+test_inputs_idx = tf.constant(test_inputs_idx)
+train_masks_idx = tf.constant(train_masks_idx)
+val_masks_idx = tf.constant(val_masks_idx)
+test_masks_idx = tf.constant(test_masks_idx)
+train_labels_idx = tf.constant(train_labels_idx)
+val_labels_idx = tf.constant(val_labels_idx)
+test_labels_idx = tf.constant(test_labels_idx)
+
+# Convert to tensors using gather
 train_inputs = tf.gather(input_ids, train_inputs_idx)
 val_inputs = tf.gather(input_ids, val_inputs_idx)
 test_inputs = tf.gather(input_ids, test_inputs_idx)
@@ -63,7 +74,7 @@ val_labels = tf.gather(labels, val_labels_idx)
 test_labels = tf.gather(labels, test_labels_idx)
 
 # Convert to tf.data.Dataset
-batch_size = 16
+batch_size = 10
 train_dataset = tf.data.Dataset.from_tensor_slices(((train_inputs, train_masks), train_labels)).shuffle(len(train_labels)).batch(batch_size)
 val_dataset = tf.data.Dataset.from_tensor_slices(((val_inputs, val_masks), val_labels)).batch(batch_size)
 test_dataset = tf.data.Dataset.from_tensor_slices(((test_inputs, test_masks), test_labels)).batch(batch_size)
@@ -75,7 +86,8 @@ model = TFAutoModelForSequenceClassification.from_pretrained('indolem/indobert-b
 @tf.function
 def train_step(model, optimizer, loss_fn, accuracy_metric, x, y):
     with tf.GradientTape() as tape:
-        logits = model(x, training=True).logits
+        input_ids, attention_masks = x
+        logits = model(input_ids, attention_mask=attention_masks, training=True).logits
         loss = loss_fn(y, logits)
     gradients = tape.gradient(loss, model.trainable_variables)
     optimizer.apply_gradients(zip(gradients, model.trainable_variables))
@@ -91,13 +103,13 @@ loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 accuracy_metric = tf.keras.metrics.Accuracy()
 
 # Training loop with validation
-epochs = 10
+epochs = 30
 for epoch in range(epochs):
     print(f"Epoch {epoch + 1}/{epochs}")
     accuracy_metric.reset_states()
     # Training
-    for step, (x_batch_train, y_batch_train) in enumerate(train_dataset):
-        loss = train_step(model, optimizer, loss_fn, accuracy_metric, x_batch_train, y_batch_train)
+    for step, ((x_batch_train, x_batch_mask), y_batch_train) in enumerate(train_dataset):
+        loss = train_step(model, optimizer, loss_fn, accuracy_metric, (x_batch_train, x_batch_mask), y_batch_train)
         if step % 10 == 0:
             print(f"Training loss (for one batch) at step {step}: {loss:.4f}")
     train_accuracy = accuracy_metric.result()
@@ -106,8 +118,8 @@ for epoch in range(epochs):
     # Validation
     val_loss = 0
     accuracy_metric.reset_states()
-    for x_batch_val, y_batch_val in val_dataset:
-        logits = model(x_batch_val, training=False).logits
+    for (x_batch_val, x_mask_val), y_batch_val in val_dataset:
+        logits = model(x_batch_val, attention_mask=x_mask_val, training=False).logits
         val_loss += loss_fn(y_batch_val, logits).numpy()
         
         preds = tf.argmax(logits, axis=1, output_type=tf.int32)
@@ -119,5 +131,5 @@ for epoch in range(epochs):
     print(f"Validation accuracy after epoch {epoch + 1}: {val_accuracy:.4f}")
 
 # Save the model
-model.save_pretrained('indobert_model_epochs10_batch16')
-tokenizer.save_pretrained('indobert_model_epochs10_batch16')
+model.save_pretrained('indobert_model')
+tokenizer.save_pretrained('indobert_model')
