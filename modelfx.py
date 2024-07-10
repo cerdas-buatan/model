@@ -18,7 +18,7 @@ df = pd.DataFrame(rows, columns=['question', 'answer'])
   
 # Initialize the tokenizer
 tokenizer = T5Tokenizer.from_pretrained('t5-small')
-
+  
 # Tokenize the input and output sequences
 input_ids = []
 attention_masks = []
@@ -76,6 +76,6 @@ dataset = tf.data.Dataset.from_tensor_slices((
 model.fit(dataset, epochs=100)
 
 # Save the model and tokenizer
-model_path = 'train_indobert'
+model_path = 't5_text_to_text_model'
 model.save_pretrained(model_path)
 tokenizer.save_pretrained(model_path)
