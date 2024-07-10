@@ -18,12 +18,12 @@ df = pd.DataFrame(rows, columns=['question', 'answer'])
   
 # Initialize the tokenizer
 tokenizer = T5Tokenizer.from_pretrained('t5-small')
-  
+
 # Tokenize the input and output sequences
 input_ids = []
 attention_masks = []
 labels = []
-  
+
 for index, row in df.iterrows():
     encoded_input = tokenizer.encode_plus(row['question'], add_special_tokens=True, max_length=64, padding='max_length', return_attention_mask=True, truncation=True)
     encoded_output = tokenizer.encode_plus(row['answer'], add_special_tokens=True, max_length=64, padding='max_length', return_attention_mask=True, truncation=True)
@@ -44,11 +44,11 @@ model = TFT5ForConditionalGeneration.from_pretrained('t5-small')
 
 # Define the optimizer
 optimizer = tf.keras.optimizers.Adam(learning_rate=5e-5)
-  
+
 # Define a custom loss function
 def compute_loss(labels, logits):
     return tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
-  
+
 # Define a custom accuracy function
 def masked_accuracy(y_true, y_pred):
     y_true = tf.cast(tf.reshape(y_true, (-1,)), tf.int64)
@@ -74,8 +74,8 @@ dataset = tf.data.Dataset.from_tensor_slices((
   
 # Train the model for more epochs
 model.fit(dataset, epochs=100)
-  
+
 # Save the model and tokenizer
-model_path = 't5_text_to_text_model'
+model_path = 'train_indobert'
 model.save_pretrained(model_path)
 tokenizer.save_pretrained(model_path)
