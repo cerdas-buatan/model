@@ -1,11 +1,3 @@
-import pandas as pd
-from transformers import AutoTokenizer, AutoModelForCausalLM, Trainer, TrainingArguments
-
-# Load pretrained DialoGPT model and tokenizer
-model_name = "microsoft/DialoGPT-medium"
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForCausalLM.from_pretrained(model_name)
-
 # Load CSV dataset
 dataset_path = "dataset.csv"
 df = pd.read_csv(dataset_path)
