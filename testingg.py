@@ -8,11 +8,11 @@ tokenizer = T5Tokenizer.from_pretrained(model_path)
 
 # Function to generate text from input
 def generate_text(input_text):
-    try:
+    try:  
         # Tokenize the input text
         inputs = tokenizer.encode_plus(input_text, return_tensors='tf', add_special_tokens=True, max_length=64, padding='max_length', truncation=True)
-        input_ids = inputs['input_ids']
-        attention_mask = inputs['attention_mask']
+        input_ids = inputs['input_ids']  
+        attention_mask = inputs['attention_mask']  
 
         # Generate text from the model
         outputs = model.generate(input_ids, attention_mask=attention_mask, max_length=64, num_beams=4, early_stopping=True)
@@ -33,5 +33,5 @@ while True:
 
     # Generate text based on input
     generated_text = generate_text(input_text)
-    print("Jawaban dari model:")
+    print("Jawaban:")
     print(generated_text)
