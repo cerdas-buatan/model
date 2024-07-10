@@ -17,37 +17,6 @@ df = pd.DataFrame(filtered_rows, columns=['question', 'answer'])
 label_encoder = LabelEncoder()
 label_encoder.fit(df['answer'])
 
-# Function to make predictions
-def predict(question):
-    encoded = tokenizer.encode_plus(
-        question,
-        add_special_tokens=True,
-        max_length=128,
-        padding='max_length',
-        truncation=True,
-        return_attention_mask=True,
-        return_tensors='tf'
-    )
-
-    input_ids = encoded['input_ids']
-    attention_mask = encoded['attention_mask']
-
-    logits = model(input_ids, attention_mask=attention_mask).logits
-    predicted_label_id = tf.argmax(logits, axis=1).numpy()[0]
-    predicted_label = label_encoder.inverse_transform([predicted_label_id])[0]
-    
-    return predicted_label
-
-# Calculate accuracy on the test set
-test_accuracy_metric = tf.keras.metrics.Accuracy()
-
-# Test the model
-with open('./dataset/dataset_sample.csv', 'r', encoding='utf-8') as file:
-    reader = csv.reader(file, delimiter='|')
-    filtered_rows = [row for row in reader if len(row) == 2 and row[0].strip() != "" and row[1].strip() != ""]
-
-df_test = pd.DataFrame(filtered_rows, columns=['question', 'answer'])
-df_test['encoded_answer'] = label_encoder.transform(df_test['answer'])
 
 input_ids_test = []
 attention_masks_test = []
