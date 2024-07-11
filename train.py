@@ -1,6 +1,7 @@
 import tensorflow as tf
 from transformers import AutoTokenizer, TFAutoModelForSequenceClassification
 import pandas as pd
+import numpy as np  # Tambahkan impor numpy
 import csv
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
@@ -35,43 +36,32 @@ for question in df['question']:
         return_attention_mask=True,
         return_tensors='tf'
     )
-    input_ids.append(encoded['input_ids'])
-    attention_masks.append(encoded['attention_mask'])
+    input_ids.append(encoded['input_ids'].numpy())
+    attention_masks.append(encoded['attention_mask'].numpy())
 
-input_ids = tf.concat(input_ids, axis=0)
-attention_masks = tf.concat(attention_masks, axis=0)
-labels = tf.constant(df['encoded_answer'].values)
+input_ids = np.concatenate(input_ids, axis=0)
+attention_masks = np.concatenate(attention_masks, axis=0)
+labels = df['encoded_answer'].values
 
 # Split the dataset into training, validation, and test sets
-train_inputs_idx, temp_inputs_idx, train_masks_idx, temp_masks_idx, train_labels_idx, temp_labels_idx = train_test_split(
-    range(len(input_ids)), range(len(attention_masks)), range(len(labels)), test_size=0.3, random_state=42
+train_inputs, temp_inputs, train_masks, temp_masks, train_labels, temp_labels = train_test_split(
+    input_ids, attention_masks, labels, test_size=0.3, random_state=42
 )
 
-val_inputs_idx, test_inputs_idx, val_masks_idx, test_masks_idx, val_labels_idx, test_labels_idx = train_test_split(
-    temp_inputs_idx, temp_masks_idx, temp_labels_idx, test_size=0.5, random_state=42
+val_inputs, test_inputs, val_masks, test_masks, val_labels, test_labels = train_test_split(
+    temp_inputs, temp_masks, temp_labels, test_size=0.5, random_state=42
 )
 
-# Convert indices to TensorFlow tensors
-train_inputs_idx = tf.constant(train_inputs_idx)
-val_inputs_idx = tf.constant(val_inputs_idx)
-test_inputs_idx = tf.constant(test_inputs_idx)
-train_masks_idx = tf.constant(train_masks_idx)
-val_masks_idx = tf.constant(val_masks_idx)
-test_masks_idx = tf.constant(test_masks_idx)
-train_labels_idx = tf.constant(train_labels_idx)
-val_labels_idx = tf.constant(val_labels_idx)
-test_labels_idx = tf.constant(test_labels_idx)
-
-# Convert to tensors using gather
-train_inputs = tf.gather(input_ids, train_inputs_idx)
-val_inputs = tf.gather(input_ids, val_inputs_idx)
-test_inputs = tf.gather(input_ids, test_inputs_idx)
-train_masks = tf.gather(attention_masks, train_masks_idx)
-val_masks = tf.gather(attention_masks, val_masks_idx)
-test_masks = tf.gather(attention_masks, test_masks_idx)
-train_labels = tf.gather(labels, train_labels_idx)
-val_labels = tf.gather(labels, val_labels_idx)
-test_labels = tf.gather(labels, test_labels_idx)
+# Convert to tensors
+train_inputs = tf.constant(train_inputs)
+val_inputs = tf.constant(val_inputs)
+test_inputs = tf.constant(test_inputs)
+train_masks = tf.constant(train_masks)
+val_masks = tf.constant(val_masks)
+test_masks = tf.constant(test_masks)
+train_labels = tf.constant(train_labels)
+val_labels = tf.constant(val_labels)
+test_labels = tf.constant(test_labels)
 
 # Convert to tf.data.Dataset
 batch_size = 10
@@ -103,16 +93,20 @@ loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 accuracy_metric = tf.keras.metrics.Accuracy()
 
 # Training loop with validation
-epochs = 30
+epochs = 20
 for epoch in range(epochs):
     print(f"Epoch {epoch + 1}/{epochs}")
     accuracy_metric.reset_states()
     # Training
+    epoch_loss = 0
     for step, ((x_batch_train, x_batch_mask), y_batch_train) in enumerate(train_dataset):
         loss = train_step(model, optimizer, loss_fn, accuracy_metric, (x_batch_train, x_batch_mask), y_batch_train)
+        epoch_loss += loss
         if step % 10 == 0:
             print(f"Training loss (for one batch) at step {step}: {loss:.4f}")
     train_accuracy = accuracy_metric.result()
+    epoch_loss /= (step + 1)
+    print(f"Training loss after epoch {epoch + 1}: {epoch_loss:.4f}")
     print(f"Training accuracy after epoch {epoch + 1}: {train_accuracy:.4f}")
     
     # Validation
