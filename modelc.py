@@ -12,14 +12,15 @@ tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-medium")
 model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-medium")
 
 
-#def tokenize_function(examples):
-    #return tokenizer(examples["input"], padding="max_length", truncation=True, max_length=128)
 def tokenize_function(examples):
     return tokenizer(examples["question"], padding="max_length", truncation=True, max_length=128)
+
+
 
 # Tokenize the input and response columns
 train_data = df[['question', 'answer']].apply(lambda row: {'question': row['question'], 'answer': row['answer']}, axis=1)
 train_data = train_data.apply(tokenize_function)
+
 
 training_args = TrainingArguments(
     output_dir="./results",
