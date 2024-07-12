@@ -1,9 +1,9 @@
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-from tensorflow.keras.layers import Embedding, LSTM, Dense, Input
-from tensorflow.keras.models import Model
-from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.layers import Embedding, LSTM, Dense, Input # type: ignore # type: ignore
+from tensorflow.keras.models import Model # type: ignore 
+from tensorflow.keras.optimizers import Adam # type: ignore
 import os
 import matplotlib.pyplot as plt
 
@@ -82,8 +82,8 @@ questions = data['question'].values
 answers = data['answer'].values
 
 # Define a function to tokenize and pad sequences
-from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.preprocessing.text import Tokenizer # type: ignore
+from tensorflow.keras.preprocessing.sequence import pad_sequences # type: ignore
 
 def preprocess_data(questions, answers, xseq_len, yseq_len, num_words):
     tokenizer = Tokenizer(num_words=num_words, oov_token='<OOV>')
