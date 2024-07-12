@@ -10,7 +10,7 @@ from sklearn.preprocessing import LabelEncoder
 def filter_valid_rows(row):
     return len(row) == 2 and row[0].strip() != "" and row[1].strip() != ""
 
-with open('./dataset/dataset_sample.csv', 'r', encoding='utf-8') as file:
+with open('./dataset/dataset_clean2.csv', 'r', encoding='utf-8') as file:
     reader = csv.reader(file, delimiter='|')
     filtered_rows = [row for row in reader if filter_valid_rows(row)]
 
@@ -64,7 +64,7 @@ val_labels = tf.constant(val_labels)
 test_labels = tf.constant(test_labels)
 
 # Convert to tf.data.Dataset
-batch_size = 10
+batch_size = 5
 train_dataset = tf.data.Dataset.from_tensor_slices(((train_inputs, train_masks), train_labels)).shuffle(len(train_labels)).batch(batch_size)
 val_dataset = tf.data.Dataset.from_tensor_slices(((val_inputs, val_masks), val_labels)).batch(batch_size)
 test_dataset = tf.data.Dataset.from_tensor_slices(((test_inputs, test_masks), test_labels)).batch(batch_size)
@@ -93,7 +93,7 @@ loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 accuracy_metric = tf.keras.metrics.Accuracy()
 
 # Training loop with validation
-epochs = 20
+epochs = 400
 for epoch in range(epochs):
     print(f"Epoch {epoch + 1}/{epochs}")
     accuracy_metric.reset_states()
