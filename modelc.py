@@ -52,10 +52,14 @@ class Seq2Seq:
     def train(self, X_train, y_train, batch_size, epochs):
         # Ensure y_train is in the right shape
         y_train = np.expand_dims(y_train, axis=-1)
+
         
         # Train the model
         history = self.model.fit([X_train, y_train[:, :]], y_train[:, :], batch_size=batch_size, epochs=epochs, validation_split=0.1)
         return history
+        #history = self.model.fit([X_train, y_train[:, :]], y_train[:, :], batch_size=batch_size, epochs=epochs, validation_split=0.1)
+        #return history
+
 
     def evaluate(self, X_test, y_test):
         # Ensure y_test is in the right shape
