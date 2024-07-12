@@ -11,7 +11,7 @@ def filter_valid_rows(row):
     return len(row) == 2 and row[0].strip() != "" and row[1].strip() != ""
 
 try:
-    with open('./dataset/dataset_sample.csv', 'r', encoding='utf-8') as file:
+    with open('./dataset/dataset_clean2.csv', 'r', encoding='utf-8') as file:
         reader = csv.reader(file, delimiter='|')
         filtered_rows = [row for row in reader if filter_valid_rows(row)]
 except FileNotFoundError as e:
@@ -34,7 +34,7 @@ inputs = tokenizer(
     padding='max_length',
     truncation=True,
     return_attention_mask=True,
-    return_tensors='tf'
+    return_tensors='np'  # Note: Changed to numpy tensors
 )
 
 input_ids = inputs['input_ids']
@@ -49,6 +49,17 @@ train_inputs, temp_inputs, train_masks, temp_masks, train_labels, temp_labels = 
 val_inputs, test_inputs, val_masks, test_masks, val_labels, test_labels = train_test_split(
     temp_inputs, temp_masks, temp_labels, test_size=0.5, random_state=42
 )
+
+# Convert back to tensors
+train_inputs = tf.constant(train_inputs)
+val_inputs = tf.constant(val_inputs)
+test_inputs = tf.constant(test_inputs)
+train_masks = tf.constant(train_masks)
+val_masks = tf.constant(val_masks)
+test_masks = tf.constant(test_masks)
+train_labels = tf.constant(train_labels)
+val_labels = tf.constant(val_labels)
+test_labels = tf.constant(test_labels)
 
 # Convert to tf.data.Dataset
 batch_size = 5
