@@ -87,6 +87,7 @@ while True:
 
 # Save results to Excel
 results_df = pd.DataFrame(results)
+results_df['Test Accuracy'] = test_accuracy.numpy()  # Add the test accuracy to the DataFrame
 results_df.to_excel('./predicted_answers.xlsx', index=False)
 
 print("Predicted answers saved to predicted_answers.xlsx")
