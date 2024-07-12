@@ -2,7 +2,10 @@ import tensorflow as tf
 from transformers import TFT5ForConditionalGeneration, T5Tokenizer
 
 # Load the trained model and tokenizer
+#model_path = 't5_text_to_text_model'
 model_path = 't5_text_to_text_model'
+
+
 
 try:
     model = TFT5ForConditionalGeneration.from_pretrained(model_path)
