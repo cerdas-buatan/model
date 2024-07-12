@@ -101,12 +101,13 @@ def preprocess_data(questions, answers, xseq_len, yseq_len, num_words):
     
     return X, y, tokenizer
 
+
 # Set the parameters
 xseq_len = 25
 yseq_len = 25
-num_words = 1000
-emb_dim = 128
-num_layers = 2
+num_words = 1500
+emb_dim = 130
+num_layers = 3
 
 # Preprocess the data
 X, y, tokenizer = preprocess_data(questions, answers, xseq_len, yseq_len, num_words)
