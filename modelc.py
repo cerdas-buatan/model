@@ -7,8 +7,12 @@ from tensorflow.keras.optimizers import Adam
 import os
 import matplotlib.pyplot as plt
 
+
 # Disable oneDNN optimizations warning
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
+
+
 
 class Seq2Seq:
     def __init__(self, xseq_len, yseq_len, xvocab_size, yvocab_size, emb_dim, num_layers):  # Perbaikan disini
