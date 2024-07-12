@@ -31,12 +31,14 @@ def generate_text(input_text):
 
 # Example usage
 while True:
-    input_text = input("Masukkan pertanyaan Anda (atau ketik 'exit' untuk keluar): ")
+    input_text = input("Masukkan pertanyaan (atau ketik 'exit' untuk keluar): ")
 
     if input_text.lower() == 'exit':
         break
 
+
+
     # Generate text based on input
     generated_text = generate_text(input_text)
-    print("Jawaban:")
+    print("Answer:")
     print(generated_text)
