@@ -11,6 +11,9 @@ df.head()
 tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-medium")
 model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-medium")
 
+
+#def tokenize_function(examples):
+    #return tokenizer(examples["input"], padding="max_length", truncation=True, max_length=128)
 def tokenize_function(examples):
     return tokenizer(examples["input"], padding="max_length", truncation=True, max_length=128)
 
