@@ -15,7 +15,7 @@ def generate_text(input_text):
         attention_mask = inputs['attention_mask']  
 
         # Generate text from the model
-        outputs = model.generate(input_ids, attention_mask=attention_mask, max_length=64, num_beams=2, early_stopping=True)
+        outputs = model.generate(input_ids, attention_mask=attention_mask, max_length=20, num_beams=2, early_stopping=True)    
  
         # Decode the generated output  
         output_text = tokenizer.decode(outputs[0], skip_special_tokens=True)  
