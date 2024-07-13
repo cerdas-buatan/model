@@ -5,8 +5,6 @@ from transformers import TFT5ForConditionalGeneration, T5Tokenizer
 #model_path = 't5_text_to_text_model'
 model_path = 't5_text_to_text_model'
 
-
-
 try:
     model = TFT5ForConditionalGeneration.from_pretrained(model_path)
     tokenizer = T5Tokenizer.from_pretrained(model_path)
@@ -38,8 +36,6 @@ while True:
 
     if input_text.lower() == 'exit':
         break
-
-
 
     # Generate text based on input
     generated_text = generate_text(input_text)
