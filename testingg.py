@@ -2,7 +2,6 @@ import tensorflow as tf
 from transformers import TFT5ForConditionalGeneration, T5Tokenizer
 
 # Load the trained model and tokenizer
-#model_path = 't5_text_to_text_model'
 model_path = 't5_text_to_text_model'
 
 try:
@@ -31,13 +30,14 @@ def generate_text(input_text):
         return f"Error in generating text: {str(e)}"
 
 # Example usage
-while True:
-    input_text = input("Masukkan pertanyaan (atau ketik 'exit' untuk keluar): ")
+if __name__ == "__main__":
+    while True:
+        input_text = input("Masukkan pertanyaan (atau ketik 'exit' untuk keluar): ")
 
-    if input_text.lower() == 'exit':
-        break
+        if input_text.lower() == 'exit':
+            break
 
-    # Generate text based on input
-    generated_text = generate_text(input_text)
-    print("Answer:")
-    print(generated_text)
+        # Generate text based on input
+        generated_text = generate_text(input_text)
+        print("Answer:")
+        print(generated_text)
