@@ -47,6 +47,13 @@ def calculate_accuracy(validation_data):
     accuracy = accuracy_score(true_answers, predicted_answers)
     return accuracys
 
+# Example validation data
+validation_data = [
+    ("Apa ibu kota Indonesia?", "Jakarta"),
+    ("Siapa presiden pertama Amerika Serikat?", "George Washington"),
+    # Tambahkan lebih banyak data validasi di sini
+]
+
 # Example usage
 if __name__ == "__main__":
     while True:
