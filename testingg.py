@@ -34,6 +34,15 @@ def calculate_accuracy(validation_data):
     true_answers = []
     predicted_answers = []
 
+    for question, true_answer in validation_data:
+        predicted_answer = generate_text(question)
+        true_answers.append(true_answer)
+        predicted_answers.append(predicted_answer)
+        print(f"Question: {question}")
+        print(f"Predicted Answer: {predicted_answer}")
+        print(f"True Answer: {true_answer}")
+        print("-" * 50)
+
 # Example usage
 if __name__ == "__main__":
     while True:
