@@ -29,6 +29,11 @@ def generate_text(input_text):
     except Exception as e:
         return f"Error in generating text: {str(e)}"
 
+# Function to calculate accuracy
+def calculate_accuracy(validation_data):
+    true_answers = []
+    predicted_answers = []
+
 # Example usage
 if __name__ == "__main__":
     while True:
