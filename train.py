@@ -101,49 +101,33 @@ print(f"Test Loss: {test_loss:.4f}")
 print(f"Test Accuracy: {test_accuracy:.4f}")
 
 # delsoon
-# Load IndoBERT model from PyTorch weights
-model = TFAutoModelForSequenceClassification.from_pretrained('indolem/indobert-base-uncased', from_pt=True, num_labels=len(label_encoder.classes_))
+# Define a custom accuracy function
+def masked_accuracy(y_true, y_pred):
+    y_true = tf.cast(tf.reshape(y_true, (-1,)), tf.int64)
+    y_pred = tf.cast(tf.argmax(y_pred, axis=-1), tf.int64)
+    y_pred = tf.reshape(y_pred, (-1,))  # Ensure y_pred is reshaped to match y_true
+    accuracy = tf.equal(y_true, y_pred)
+    mask = tf.cast(tf.not_equal(y_true, tokenizer.pad_token_id), tf.float32)  # Ignore padding tokens
+    accuracy = tf.cast(accuracy, tf.float32) * mask
+    return tf.reduce_sum(accuracy) / tf.reduce_sum(mask)
 
-# Compile the model
-optimizer = tf.keras.optimizers.Adam(learning_rate=2e-5, epsilon=1e-8)
-loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-accuracy_metric = tf.keras.metrics.SparseCategoricalAccuracy('accuracy')
+# Compile the model with the custom accuracy metric
+model.compile(optimizer=optimizer, loss=compute_loss, metrics=[masked_accuracy])
+  
+# Create a tf.data.Dataset
+dataset = tf.data.Dataset.from_tensor_slices((
+    {
+        'input_ids': input_ids,
+        'attention_mask': attention_masks,
+        'labels': labels
+    },
+    labels
+)).batch(30)
+  
+# Train the model for more epochs
+model.fit(dataset, epochs=100)
 
-model.compile(optimizer=optimizer, loss=loss_fn, metrics=[accuracy_metric])
-
-# Callbacks
-callbacks = [
-    tf.keras.callbacks.ModelCheckpoint(filepath='best_model.h5', save_best_only=True, monitor='val_loss', mode='min'),
-    tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
-]
-
-# Load IndoBERT model from PyTorch weights
-model = TFAutoModelForSequenceClassification.from_pretrained('indolem/indobert-base-uncased', from_pt=True, num_labels=len(label_encoder.classes_))
-
-# Compile the model
-optimizer = tf.keras.optimizers.Adam(learning_rate=2e-5, epsilon=1e-8)
-loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-accuracy_metric = tf.keras.metrics.SparseCategoricalAccuracy('accuracy')
-
-model.compile(optimizer=optimizer, loss=loss_fn, metrics=[accuracy_metric])
-
-# Callbacks
-callbacks = [
-    tf.keras.callbacks.ModelCheckpoint(filepath='best_model.h5', save_best_only=True, monitor='val_loss', mode='min'),
-    tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
-]
-# Load IndoBERT model from PyTorch weights
-model = TFAutoModelForSequenceClassification.from_pretrained('indolem/indobert-base-uncased', from_pt=True, num_labels=len(label_encoder.classes_))
-
-# Compile the model
-optimizer = tf.keras.optimizers.Adam(learning_rate=2e-5, epsilon=1e-8)
-loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-accuracy_metric = tf.keras.metrics.SparseCategoricalAccuracy('accuracy')
-
-model.compile(optimizer=optimizer, loss=loss_fn, metrics=[accuracy_metric])
-
-# Callbacks
-callbacks = [
-    tf.keras.callbacks.ModelCheckpoint(filepath='best_model.h5', save_best_only=True, monitor='val_loss', mode='min'),
-    tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
-]
+# Save the model and tokenizer
+model_path = 't5_text_to_text_model'
+model.save_pretrained(model_path)
+tokenizer.save_pretrained(model_path)
