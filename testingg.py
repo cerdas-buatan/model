@@ -43,6 +43,10 @@ def calculate_accuracy(validation_data):
         print(f"True Answer: {true_answer}")
         print("-" * 50)
 
+        # Calculate accuracy using sklearn's accuracy_score
+    accuracy = accuracy_score(true_answers, predicted_answers)
+    return accuracys
+
 # Example usage
 if __name__ == "__main__":
     while True:
