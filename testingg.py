@@ -54,15 +54,6 @@ validation_data = [
     # Tambahkan lebih banyak data validasi di sini
 ]
 
-# Example usage
-if __name__ == "__main__":
-    while True:
-        input_text = input("Masukkan pertanyaan (atau ketik 'exit' untuk keluar): ")
-
-        if input_text.lower() == 'exit':
-            break
-
-        # Generate text based on input
-        generated_text = generate_text(input_text)
-        print("Answer:")
-        print(generated_text)
+# Calculate and print accuracy
+accuracy = calculate_accuracy(validation_data)
+print(f"Accuracy: {accuracy * 100:.2f}%")
