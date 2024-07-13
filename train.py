@@ -99,3 +99,14 @@ tokenizer.save_pretrained('indobert_model')
 test_loss, test_accuracy = model.evaluate(test_dataset)
 print(f"Test Loss: {test_loss:.4f}")
 print(f"Test Accuracy: {test_accuracy:.4f}")
+
+# delsoon
+# Save the model
+model.save_pretrained('indobert_model')
+tokenizer.save_pretrained('indobert_model')
+
+# Evaluate the model on the test set
+test_loss, test_accuracy = model.evaluate(test_dataset)
+print(f"Test Loss: {test_loss:.4f}")
+print(f"Test Accuracy: {test_accuracy:.4f}")
+
