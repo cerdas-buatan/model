@@ -101,12 +101,18 @@ print(f"Test Loss: {test_loss:.4f}")
 print(f"Test Accuracy: {test_accuracy:.4f}")
 
 # delsoon
-# Save the model
-model.save_pretrained('indobert_model')
-tokenizer.save_pretrained('indobert_model')
+# Load IndoBERT model from PyTorch weights
+model = TFAutoModelForSequenceClassification.from_pretrained('indolem/indobert-base-uncased', from_pt=True, num_labels=len(label_encoder.classes_))
 
-# Evaluate the model on the test set
-test_loss, test_accuracy = model.evaluate(test_dataset)
-print(f"Test Loss: {test_loss:.4f}")
-print(f"Test Accuracy: {test_accuracy:.4f}")
+# Compile the model
+optimizer = tf.keras.optimizers.Adam(learning_rate=2e-5, epsilon=1e-8)
+loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+accuracy_metric = tf.keras.metrics.SparseCategoricalAccuracy('accuracy')
 
+model.compile(optimizer=optimizer, loss=loss_fn, metrics=[accuracy_metric])
+
+# Callbacks
+callbacks = [
+    tf.keras.callbacks.ModelCheckpoint(filepath='best_model.h5', save_best_only=True, monitor='val_loss', mode='min'),
+    tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
+]
