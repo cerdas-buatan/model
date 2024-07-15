@@ -62,7 +62,7 @@ val_labels = tf.constant(val_labels)
 test_labels = tf.constant(test_labels)
 
 # Convert to tf.data.Dataset
-batch_size = 10
+batch_size = 5
 train_dataset = tf.data.Dataset.from_tensor_slices(((train_inputs, train_masks), train_labels)).shuffle(len(train_labels)).batch(batch_size)
 val_dataset = tf.data.Dataset.from_tensor_slices(((val_inputs, val_masks), val_labels)).batch(batch_size)
 test_dataset = tf.data.Dataset.from_tensor_slices(((test_inputs, test_masks), test_labels)).batch(batch_size)
@@ -86,7 +86,7 @@ callbacks = [
 # Train the model
 history = model.fit(
     train_dataset,
-    epochs=500,
+    epochs=400,
     validation_data=val_dataset,
     callbacks=callbacks
 )
