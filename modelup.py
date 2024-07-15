@@ -98,3 +98,26 @@ model.fit(dataset, epochs=100)
 model_path = 't5_text_to_text_model'
 model.save_pretrained(model_path)
 tokenizer.save_pretrained(model_path)
+
+# Load the model and tokenizer for generating text
+model = TFT5ForConditionalGeneration.from_pretrained(model_path)
+tokenizer = T5Tokenizer.from_pretrained(model_path)
+
+# Define a function to generate text based on input
+def generate_text(input_text):
+    input_ids = tokenizer.encode(input_text, return_tensors='tf', max_length=64, truncation=True, padding='max_length')
+    output_ids = model.generate(input_ids=input_ids, max_length=64, num_beams=5, early_stopping=True)
+    output_text = tokenizer.decode(output_ids[0], skip_special_tokens=True)
+    return output_text
+
+# Example usage
+while True:
+    input_text = input("Masukkan pertanyaan Anda (atau ketik 'exit' untuk keluar): ")
+
+    if input_text.lower() == 'exit':
+        break
+
+    # Generate text based on input
+    generated_text = generate_text(input_text)
+    print("Jawaban dari model:")
+    print(generated_text)
