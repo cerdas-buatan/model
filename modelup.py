@@ -1,25 +1,31 @@
 import tensorflow as tf
 from transformers import TFT5ForConditionalGeneration, T5Tokenizer
 import pandas as pd
+import os
 import requests
+
+# Path to the dataset file
+dataset_path = 'dataset_clean2.csv'
 
 # URL of the dataset in the GitHub repository
 url = 'https://raw.githubusercontent.com/cerdas-buatan/dataset/main/dataset_clean2.csv'
 
-# Download the dataset
-response = requests.get(url)
-if response.status_code == 200:
-    # Save the dataset to a local file
-    with open('dataset_clean2.csv', 'wb') as file:
-        file.write(response.content)
-else:
-    raise Exception(f"Failed to download dataset: {response.status_code}")
+# Check if the dataset already exists locally
+if not os.path.exists(dataset_path):
+    # Download the dataset
+    response = requests.get(url)
+    if response.status_code == 200:
+        # Save the dataset to a local file
+        with open(dataset_path, 'wb') as file:
+            file.write(response.content)
+    else:
+        raise Exception(f"Failed to download dataset: {response.status_code}")
 
 # Initialize an empty list to store cleaned rows
 rows = []
 
 # Read and clean the dataset, handling any anomalies
-with open('dataset_clean2.csv', 'r', encoding='utf-8') as file:
+with open(dataset_path, 'r', encoding='utf-8') as file:
     for line_number, line in enumerate(file):
         # Split line by '|' and handle any unexpected lines
         parts = line.strip().split('|')
