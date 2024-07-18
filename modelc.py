@@ -7,12 +7,8 @@ from tensorflow.keras.optimizers import Adam # type: ignore
 import os
 import matplotlib.pyplot as plt
 
-
 # Disable oneDNN optimizations warning
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
-
-
-
 
 class Seq2Seq:
     def __init__(self, xseq_len, yseq_len, xvocab_size, yvocab_size, emb_dim, num_layers):  # Perbaikan disini
@@ -52,14 +48,12 @@ class Seq2Seq:
     def train(self, X_train, y_train, batch_size, epochs):
         # Ensure y_train is in the right shape
         y_train = np.expand_dims(y_train, axis=-1)
-
         
         # Train the model
         history = self.model.fit([X_train, y_train[:, :]], y_train[:, :], batch_size=batch_size, epochs=epochs, validation_split=0.1)
         return history
         #history = self.model.fit([X_train, y_train[:, :]], y_train[:, :], batch_size=batch_size, epochs=epochs, validation_split=0.1)
         #return history
-
 
     def evaluate(self, X_test, y_test):
         # Ensure y_test is in the right shape
@@ -101,7 +95,6 @@ def preprocess_data(questions, answers, xseq_len, yseq_len, num_words):
     
     return X, y, tokenizer
 
-
 # Set the parameters
 xseq_len = 25
 yseq_len = 25
@@ -123,17 +116,15 @@ history = model.train(X_train, y_train, batch_size=16, epochs=3)
 # Evaluate the model
 model.evaluate(X_test, y_test)
 
-
-
 # Display training history
 # Plot training & validation accuracy values
 #plt.plot(history.history['accuracy'])
 #plt.plot(history.history['val_accuracy'])
-#plt.title('Model accuracy')
-#plt.ylabel('Accuracy')
-#plt.xlabel('Epoch')
-#plt.legend(['Train', 'Validation'], loc='upper left')
-#plt.show()
+#plt.title('Model accuracy')  
+#plt.ylabel('Accuracy')  
+#plt.xlabel('Epoch')  
+#plt.legend(['Train', 'Validation'], loc='upper left')  
+#plt.show()  
 plt.plot(history.history['accuracy'])
 plt.plot(history.history['val_accuracy'])
 plt.title('Model accuracy')
