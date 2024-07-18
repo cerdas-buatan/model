@@ -1,9 +1,6 @@
 import tensorflow as tf
 from transformers import TFT5ForConditionalGeneration, T5Tokenizer
 from sklearn.metrics import accuracy_score
-
-
-
   
 # Load the trained model and tokenizer
 model_path = 't5_text_to_text_model'
@@ -50,13 +47,6 @@ def calculate_accuracy(validation_data):
         # Calculate accuracy using sklearn's accuracy_score
     accuracy = accuracy_score(true_answers, predicted_answers)
     return accuracys
-
-# Example validation data
-validation_data = [
-    ("Apa ibu kota Indonesia?", "Jakarta"),
-    ("Siapa presiden pertama Amerika Serikat?", "George Washington"),
-    # Tambahkan lebih banyak data validasi di sini
-]
 
 # Calculate and print accuracy
 accuracy = calculate_accuracy(validation_data)
