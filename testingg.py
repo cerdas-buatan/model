@@ -1,7 +1,6 @@
 import tensorflow as tf
 from transformers import TFT5ForConditionalGeneration, T5Tokenizer
-from sklearn.metrics import accuracy_score
-  
+
 # Load the trained model and tokenizer
 model_path = 't5_text_to_text_model'
 
@@ -30,24 +29,8 @@ def generate_text(input_text):
     except Exception as e:
         return f"Error in generating text: {str(e)}"
 
-# Function to calculate accuracy
-def calculate_accuracy(validation_data):
-    true_answers = []
-    predicted_answers = []
-
-    for question, true_answer in validation_data:
-        predicted_answer = generate_text(question)
-        true_answers.append(true_answer)
-        predicted_answers.append(predicted_answer)
-        print(f"Question: {question}")
-        print(f"Predicted Answer: {predicted_answer}")
-        print(f"True Answer: {true_answer}")
-        print("-" * 50)
-
-        # Calculate accuracy using sklearn's accuracy_score
-    accuracy = accuracy_score(true_answers, predicted_answers)
-    return accuracys
-
-# Calculate and print accuracy
-accuracy = calculate_accuracy(validation_data)
-print(f"Accuracy: {accuracy * 100:.2f}%")
+# Example usage
+input_text = "Apa ibu kota Indonesia?"
+output_text = generate_text(input_text)
+print(f"Input: {input_text}")
+print(f"Output: {output_text}")
