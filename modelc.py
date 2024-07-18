@@ -60,9 +60,10 @@ class Seq2Seq:
         y_test = np.expand_dims(y_test, axis=-1)
         
         # Evaluate the model
-        results = self.model.evaluate([X_test, y_test[:, :]], y_test[:, :])
+        results = self.model.evaluate([X_test, y_test[:, :-1]], y_test[:, 1:])
         print(f'Test Loss: {results[0]}')
         print(f'Test Accuracy: {results[1]}')
+        return results
 
     def add_data(self, X_new, y_new):
         global X_train, y_train
@@ -78,10 +79,6 @@ data['answer'] = data['answer'].astype(str).fillna('')
 
 questions = data['question'].values
 answers = data['answer'].values
-
-# Define a function to tokenize and pad sequences
-from tensorflow.keras.preprocessing.text import Tokenizer # type: ignore
-from tensorflow.keras.preprocessing.sequence import pad_sequences # type: ignore
 
 def preprocess_data(questions, answers, xseq_len, yseq_len, num_words):
     tokenizer = Tokenizer(num_words=num_words, oov_token='<OOV>')
@@ -106,7 +103,6 @@ num_layers = 3
 X, y, tokenizer = preprocess_data(questions, answers, xseq_len, yseq_len, num_words)
 
 # Split the data into training and testing sets
-from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Instantiate and train the model
@@ -114,7 +110,7 @@ model = Seq2Seq(xseq_len=xseq_len, yseq_len=yseq_len, xvocab_size=num_words, yvo
 history = model.train(X_train, y_train, batch_size=16, epochs=3)
 
 # Evaluate the model
-model.evaluate(X_test, y_test)
+results = model.evaluate(X_test, y_test)
 
 # Display training history
 # Plot training & validation accuracy values
