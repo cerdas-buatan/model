@@ -1,6 +1,10 @@
 import tensorflow as tf
 from transformers import TFT5ForConditionalGeneration, T5Tokenizer
+from sklearn.metrics import accuracy_score
 
+
+
+  
 # Load the trained model and tokenizer
 model_path = 't5_text_to_text_model'
 
