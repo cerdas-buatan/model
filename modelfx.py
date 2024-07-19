@@ -70,10 +70,10 @@ dataset = tf.data.Dataset.from_tensor_slices((
         'labels': labels
     },
     labels
-)).batch(30)
+)).batch(10)
   
 # Train the model for more epochs
-model.fit(dataset, epochs=100)
+model.fit(dataset, epochs=200)
 
 # Save the model and tokenizer
 model_path = 't5_text_to_text_model'
