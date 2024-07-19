@@ -6,7 +6,7 @@ import pandas as pd
 rows = []
 
 # Baca dan bersihkan dataset, menangani anomali apa pun
-with open('./dataset/dataset_clean2.csv', 'r', encoding='utf-8') as file:
+with open('dataset_clean2.csv', 'r', encoding='utf-8') as file:
     for line_number, line in enumerate(file):
         # Pisahkan baris berdasarkan '|' dan tangani baris yang tidak terduga
         parts = line.strip().split('|')
@@ -79,3 +79,6 @@ model.fit(dataset, epochs=200)
 model_path = 't5_text_to_text_model'
 model.save_pretrained(model_path)
 tokenizer.save_pretrained(model_path)
+
+
+
