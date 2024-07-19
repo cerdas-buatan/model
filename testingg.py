@@ -5,10 +5,10 @@ from transformers import TFT5ForConditionalGeneration, T5Tokenizer
 model_path = 't5_text_to_text_model'
 
 try:
-    model = TFT5ForConditionalGeneration.from_pretrained(model_path)
-    tokenizer = T5Tokenizer.from_pretrained(model_path)
+    model_t5 = TFT5ForConditionalGeneration.from_pretrained(model_path)
+    tokenizer_t5 = T5Tokenizer.from_pretrained(model_path)
 except Exception as e:
-    print(f"Error loading model or tokenizer: {str(e)}")
+    print(f"Error loading T5 model or tokenizer: {str(e)}")
     exit()
 
 # Load the tokenizer and model for IndoBERT
