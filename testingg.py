@@ -11,6 +11,14 @@ except Exception as e:
     print(f"Error loading model or tokenizer: {str(e)}")
     exit()
 
+# Load the tokenizer and model for IndoBERT
+try:
+    tokenizer_bert = AutoTokenizer.from_pretrained('indolem/indobert-base-uncased')
+    model_bert = TFAutoModelForSequenceClassification.from_pretrained('indolem/indobert-base-uncased', from_pt=True)
+except Exception as e:
+    print(f"Error loading IndoBERT model or tokenizer: {str(e)}")
+    exit()
+
 # Function to generate text from input
 def generate_text(input_text):
     try:
