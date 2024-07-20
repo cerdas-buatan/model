@@ -82,3 +82,6 @@ def main():
     
     input_text = "Apa ibu kota Indonesia?"
     output_text = text_generator.generate_text(input_text)
+
+if __name__ == "__main__":
+    main()
