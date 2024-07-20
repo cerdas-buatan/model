@@ -3,8 +3,8 @@ from transformers import TFT5ForConditionalGeneration, T5Tokenizer, AutoTokenize
 import pandas as pd
 import csv
 from sklearn.preprocessing import LabelEncoder
-from pathlib import Path
-import logging
+#from pathlib import Path
+#import logging
 
 # Load the trained model and tokenizer
 model_path = 't5_text_to_text_model'
@@ -53,17 +53,17 @@ output_text = generate_text(input_text)
 print(f"Input: {input_text}")
 print(f"Output: {output_text}")
 
-logging.basicConfig(level=logging.ERROR)
+#logging.basicConfig(level=logging.ERROR)
 
-def load_model_and_tokenizer(model_path: str, model_class, tokenizer_class):
-    """Load the specified model and tokenizer."""
-    try:
-        model = model_class.from_pretrained(model_path)
-        tokenizer = tokenizer_class.from_pretrained(model_path)
-        return model, tokenizer
-    except Exception as e:
-        logging.error(f"Error loading {model_class.__name__} or tokenizer: {str(e)}")
-        exit()
+#def load_model_and_tokenizer(model_path: str, #model_class, tokenizer_class):
+#    """Load the specified model and tokenizer."""
+#    try:
+#        model = model_class.from_pretrained(model_path)
+#        tokenizer = tokenizer_class.from_pretrained(model_path)
+#        return model, tokenizer
+#    except Exception as e:
+#        logging.error(f"Error loading {model_class.#__name__} or tokenizer: {str(e)}")
+#        exit()
 
 #class TextGenerator:
 #    def __init__(self, t5_model_path: str, bert_model_path: str, dataset_path: str):
