@@ -4,15 +4,15 @@ import pandas as pd
 import csv
 from sklearn.preprocessing import LabelEncoder
 
-# Load the trained T5 model and tokenizer
-model_path = 't5_text_to_text_model'
-
-try:
-    model_t5 = TFT5ForConditionalGeneration.from_pretrained(model_path)
-    tokenizer_t5 = T5Tokenizer.from_pretrained(model_path)
-except Exception as e:
-    print(f"Error loading T5 model or tokenizer: {str(e)}")
-    exit()
+def load_model_and_tokenizer(model_path, bert_model_name):
+    """
+    Load the T5 model and tokenizer, and the IndoBERT tokenizer and model.
+    """
+    try:
+        model_t5 = TFT5ForConditionalGeneration.from_pretrained(model_path)
+        tokenizer_t5 = T5Tokenizer.from_pretrained(model_path)
+    except Exception as e:
+        raise RuntimeError(f"Error loading T5 model or tokenizer: {str(e)}")
 
 # Load the tokenizer and model for IndoBERT
 try:
