@@ -65,14 +65,14 @@ def load_model_and_tokenizer(model_path: str, model_class, tokenizer_class):
         logging.error(f"Error loading {model_class.__name__} or tokenizer: {str(e)}")
         exit()
 
-class TextGenerator:
-    def __init__(self, t5_model_path: str, bert_model_path: str, dataset_path: str):
-        self.model_t5, self.tokenizer_t5 = load_model_and_tokenizer(t5_model_path, TFT5ForConditionalGeneration, T5Tokenizer)
-        self.tokenizer_bert, self.model_bert = load_model_and_tokenizer(bert_model_path, TFAutoModelForSequenceClassification, AutoTokenizer)
-        self.dataset = load_dataset(dataset_path)
-        self.label_encoder = LabelEncoder()
-        self.label_encoder.fit(self.dataset['answer'])
-
+#class TextGenerator:
+#    def __init__(self, t5_model_path: str, bert_model_path: str, dataset_path: str):
+#        self.model_t5, self.tokenizer_t5 = load_model_and_tokenizer(t5_model_path, TFT5ForConditionalGeneration, T5Tokenizer)
+#        self.tokenizer_bert, self.model_bert = load_model_and_tokenizer(bert_model_path, TFAutoModelForSequenceClassification, AutoTokenizer)
+#        self.dataset = load_dataset(dataset_path)
+#        self.label_encoder = LabelEncoder()
+#        self.label_encoder.fit(self.dataset['answer'])
+#
 def main():
     t5_model_path = 't5_text_to_text_model'
     bert_model_path = 'indolem/indobert-base-uncased'
