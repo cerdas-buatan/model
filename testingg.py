@@ -58,3 +58,7 @@ output_text = generate_text(input_text)
 print(f"Input: {input_text}")
 print(f"Output: {output_text}")
 
+def main():
+    model_path = 't5_text_to_text_model'
+    bert_model_name = 'indolem/indobert-base-uncased'
+    dataset_path = 'dataset_clean2.csv'
