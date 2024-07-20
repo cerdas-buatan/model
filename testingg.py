@@ -14,13 +14,13 @@ def load_model_and_tokenizer(model_path, bert_model_name):
     except Exception as e:
         raise RuntimeError(f"Error loading T5 model or tokenizer: {str(e)}")
 
-# Load the tokenizer and model for IndoBERT
 try:
-    tokenizer_bert = AutoTokenizer.from_pretrained('indolem/indobert-base-uncased')
-    model_bert = TFAutoModelForSequenceClassification.from_pretrained('indolem/indobert-base-uncased', from_pt=True)
-except Exception as e:
-    print(f"Error loading IndoBERT model or tokenizer: {str(e)}")
-    exit()
+        tokenizer_bert = AutoTokenizer.from_pretrained(bert_model_name)
+        model_bert = TFAutoModelForSequenceClassification.from_pretrained(bert_model_name, from_pt=True)
+    except Exception as e:
+        raise RuntimeError(f"Error loading IndoBERT model or tokenizer: {str(e)}")
+    
+    return model_t5, tokenizer_t5, model_bert, tokenizer_bert
 
 # Load the dataset and encode labels
 with open('dataset_clean2.csv', 'r', encoding='utf-8') as file:
