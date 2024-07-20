@@ -4,7 +4,7 @@ import pandas as pd
 import csv
 from sklearn.preprocessing import LabelEncoder
 
-# Load the trained model and tokenizer
+# Load the trained T5 model and tokenizer
 model_path = 't5_text_to_text_model'
 
 try:
@@ -54,3 +54,4 @@ input_text = "Apa ibu kota Indonesia?"
 output_text = generate_text(input_text)
 print(f"Input: {input_text}")
 print(f"Output: {output_text}")
+
