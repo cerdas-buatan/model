@@ -56,3 +56,15 @@ input_text = "Apa ibu kota Indonesia?"
 output_text = generate_text(input_text)
 print(f"Input: {input_text}")
 print(f"Output: {output_text}")
+
+logging.basicConfig(level=logging.ERROR)
+
+def load_model_and_tokenizer(model_path: str, model_class, tokenizer_class):
+    """Load the specified model and tokenizer."""
+    try:
+        model = model_class.from_pretrained(model_path)
+        tokenizer = tokenizer_class.from_pretrained(model_path)
+        return model, tokenizer
+    except Exception as e:
+        logging.error(f"Error loading {model_class.__name__} or tokenizer: {str(e)}")
+        exit()
