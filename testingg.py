@@ -14,13 +14,13 @@ def load_model_and_tokenizer(model_path, bert_model_name):
     except Exception as e:
         raise RuntimeError(f"Error loading T5 model or tokenizer: {str(e)}")
 
-# Load the tokenizer and model for IndoBERT
-try:
-    tokenizer_bert = AutoTokenizer.from_pretrained('indolem/indobert-base-uncased')
-    model_bert = TFAutoModelForSequenceClassification.from_pretrained('indolem/indobert-base-uncased', from_pt=True)
-except Exception as e:
-    print(f"Error loading IndoBERT model or tokenizer: {str(e)}")
-    exit()
+    try:
+        tokenizer_bert = AutoTokenizer.from_pretrained(bert_model_name)
+        model_bert = TFAutoModelForSequenceClassification.from_pretrained(bert_model_name, from_pt=True)
+    except Exception as e:
+        raise RuntimeError(f"Error loading IndoBERT model or tokenizer: {str(e)}")
+    
+    return model_t5, tokenizer_t5, model_bert, tokenizer_bert
 
 def load_and_preprocess_data(filepath):
     """
@@ -34,7 +34,7 @@ def load_and_preprocess_data(filepath):
     label_encoder = LabelEncoder()
     label_encoder.fit(df['answer'])
     
-    return df, label_encoders
+    return df, label_encoder
 
 def generate_text(input_text, tokenizer, model):
     """
@@ -52,18 +52,12 @@ def generate_text(input_text, tokenizer, model):
     except Exception as e:
         return f"Error in generating text: {str(e)}"
 
-# Example usage
-input_text = "Apa ibu kota Indonesia?"
-output_text = generate_text(input_text)
-print(f"Input: {input_text}")
-print(f"Output: {output_text}")
-
 def main():
     model_path = 't5_text_to_text_model'
     bert_model_name = 'indolem/indobert-base-uncased'
     dataset_path = 'dataset_clean2.csv'
 
-# Load models and tokenizers
+    # Load models and tokenizers
     model_t5, tokenizer_t5, model_bert, tokenizer_bert = load_model_and_tokenizer(model_path, bert_model_name)
 
     # Load and preprocess data
