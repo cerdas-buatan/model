@@ -72,3 +72,13 @@ class TextGenerator:
         self.dataset = load_dataset(dataset_path)
         self.label_encoder = LabelEncoder()
         self.label_encoder.fit(self.dataset['answer'])
+
+def main():
+    t5_model_path = 't5_text_to_text_model'
+    bert_model_path = 'indolem/indobert-base-uncased'
+    dataset_path = 'dataset_clean2.csv'
+
+    text_generator = TextGenerator(t5_model_path, bert_model_path, dataset_path)
+    
+    input_text = "Apa ibu kota Indonesia?"
+    output_text = text_generator.generate_text(input_text)
