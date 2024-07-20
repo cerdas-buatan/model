@@ -36,19 +36,17 @@ def load_and_preprocess_data(filepath):
     
     return df, label_encoders
 
-# Function to generate text from input
-def generate_text(input_text):
+def generate_text(input_text, tokenizer, model):
+    """
+    Generate text from the input using the T5 model.
+    """
     try:
-        # Tokenize the input text using T5 tokenizer
-        inputs = tokenizer_t5.encode_plus(input_text, return_tensors='tf', add_special_tokens=True, max_length=50, padding='max_length', truncation=True)
+        inputs = tokenizer.encode_plus(input_text, return_tensors='tf', add_special_tokens=True, max_length=50, padding='max_length', truncation=True)
         input_ids = inputs['input_ids']
         attention_mask = inputs['attention_mask']
-
-        # Generate text from the T5 model
-        outputs = model_t5.generate(input_ids, attention_mask=attention_mask, max_length=50, num_beams=2, early_stopping=True)
-
-        # Decode the generated output
-        output_text = tokenizer_t5.decode(outputs[0], skip_special_tokens=True)
+        
+        outputs = model.generate(input_ids, attention_mask=attention_mask, max_length=50, num_beams=2, early_stopping=True)
+        output_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
         return output_text
     except Exception as e:
