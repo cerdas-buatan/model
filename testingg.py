@@ -25,13 +25,12 @@ except Exception as e:
     exit()
 
 # Load the dataset and encode labels
-with open('dataset_clean2.csv', 'r', encoding='utf-8') as file:
-    reader = csv.reader(file, delimiter='|')
-    filtered_rows = [row for row in reader if len(row) == 2 and row[0].strip() != "" and row[1].strip() != ""]
-
-df = pd.DataFrame(filtered_rows, columns=['question', 'answer'])
-label_encoder = LabelEncoder()
-label_encoder.fit(df['answer'])
+def load_dataset(file_path: str):
+    """Load and clean the dataset."""
+    with open(file_path, 'r', encoding='utf-8') as file:
+        reader = csv.reader(file, delimiter='|')
+        filtered_rows = [row for row in reader if len(row) == 2 and row[0].strip() != "" and row[1].strip() != ""]
+    return pd.DataFrame(filtered_rows, columns=['question', 'answer'])
 
 # Function to generate text from input
 def generate_text(input_text):
