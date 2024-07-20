@@ -1,3 +1,4 @@
+# import library yang di butuhkan
 import tensorflow as tf
 from transformers import TFT5ForConditionalGeneration, T5Tokenizer
 import pandas as pd
@@ -5,7 +6,7 @@ import pandas as pd
 # Inisialisasi daftar kosong untuk menyimpan baris yang telah dibersihkan
 rows = []
   
-# Read and clean the dataset, handling any anomalies
+# Read and clean dataset, handling any anomalies
 with open('dataset_clean2.csv', 'r', encoding='utf-8') as file:
     for line_number, line in enumerate(file):
         # Pisahkan baris berdasarkan '|' dan tangani baris yang tidak terduga
@@ -72,7 +73,7 @@ dataset = tf.data.Dataset.from_tensor_slices((
     labels
 )).batch(5)
   
-# Train the model for more epochs
+# Train model for more epochs
 model.fit(dataset, epochs=100)
 
 # Simpan model dan tokenizer
