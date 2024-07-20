@@ -4,9 +4,9 @@ import pandas as pd
 
 # Inisialisasi daftar kosong untuk menyimpan baris yang telah dibersihkan
 rows = []
-
-# Baca dan bersihkan dataset, menangani anomali apa pun
-with open('dataset/dataset_clean2.csv', 'r', encoding='utf-8') as file:
+  
+# Read and clean the dataset, handling any anomalies
+with open('dataset_clean2.csv', 'r', encoding='utf-8') as file:
     for line_number, line in enumerate(file):
         # Pisahkan baris berdasarkan '|' dan tangani baris yang tidak terduga
         parts = line.strip().split('|')
@@ -70,12 +70,13 @@ dataset = tf.data.Dataset.from_tensor_slices((
         'labels': labels
     },
     labels
-)).batch(10)
-
-# Latih model selama lebih banyak epoch
-model.fit(dataset, epochs=200)
+)).batch(30)
+  
+# Train the model for more epochs
+model.fit(dataset, epochs=3)
 
 # Simpan model dan tokenizer
 model_path = 't5_text_to_text_model'
 model.save_pretrained(model_path)
 tokenizer.save_pretrained(model_path)
+s
