@@ -19,3 +19,8 @@ df = pd.DataFrame(rows, columns=['question', 'answer'])
 
 # Inisialisasi tokenizer
 tokenizer = T5Tokenizer.from_pretrained('t5-small')
+
+# Tokenisasi input dan output sequence
+input_ids = []
+attention_masks = []
+labels = []
