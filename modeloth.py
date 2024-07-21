@@ -50,16 +50,3 @@ optimizer = tf.keras.optimizers.Adam(learning_rate=5e-5)
 def compute_loss(labels, logits):
     return tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
 
-# Definisikan fungsi akurasi custom
-def masked_accuracy(y_true, y_pred):
-    y_true = tf.cast(tf.reshape(y_true, (-1,)), tf.int64)
-    y_pred = tf.cast(tf.argmax(y_pred, axis=-1), tf.int64)
-    y_pred = tf.reshape(y_pred, (-1,))  # Pastikan y_pred diubah bentuknya agar sesuai dengan y_true
-    accuracy = tf.equal(y_true, y_pred)
-    mask = tf.cast(tf.not_equal(y_true, tokenizer.pad_token_id), tf.float32)  # Abaikan token padding
-    accuracy = tf.cast(accuracy, tf.float32) * mask
-    return tf.reduce_sum(accuracy) / tf.reduce_sum(mask)
-
-# Kompilasi model dengan metrik akurasi custom
-model.compile(optimizer=optimizer, loss=compute_loss, metrics=[masked_accuracy])
-
