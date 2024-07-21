@@ -2,6 +2,7 @@
 import tensorflow as tf
 from transformers import TFT5ForConditionalGeneration, T5Tokenizer
 import pandas as pd
+import numpy as np
 
 # Inisialisasi daftar kosong untuk menyimpan baris yang telah dibersihkan
 rows = []
@@ -16,6 +17,9 @@ with open('dataset_clean2.csv', 'r', encoding='utf-8') as file:
 
 # Konversi baris yang telah dibersihkan ke DataFrame
 df = pd.DataFrame(rows, columns=['question', 'answer'])
+
+# Mengatasi missing values
+df.dropna(inplace=True)
 
 # Inisialisasi tokenizer
 tokenizer = T5Tokenizer.from_pretrained('t5-small')
