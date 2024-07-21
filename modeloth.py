@@ -82,3 +82,9 @@ def evaluate_model(model, tokenizer, question, answer):
     print(f'Question: {question}')
     print(f'Expected Answer: {answer}')
     print(f'Generated Answer: {generated_answer}')
+
+# Uji model dengan contoh
+test_question = "Apa itu machine learning?"
+test_answer = "Machine learning adalah cabang dari kecerdasan buatan yang berfokus pada pengembangan algoritma yang memungkinkan komputer belajar dari data."
+evaluate_model(model, tokenizer, test_question, test_answer)
+
