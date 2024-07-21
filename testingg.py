@@ -2,23 +2,10 @@ import tensorflow as tf
 from transformers import TFT5ForConditionalGeneration, T5Tokenizer
 import pandas as pd
 
-def load_model_and_tokenizer(model_path, bert_model_name):
-    """
-    Load the T5 model and tokenizer, and the IndoBERT tokenizer and model.
-    """
-    try:
-        model_t5 = TFT5ForConditionalGeneration.from_pretrained(model_path)
-        tokenizer_t5 = T5Tokenizer.from_pretrained(model_path)
-    except Exception as e:
-        raise RuntimeError(f"Error loading T5 model or tokenizer: {str(e)}")
-
-    try:
-        tokenizer_bert = AutoTokenizer.from_pretrained(bert_model_name)
-        model_bert = TFAutoModelForSequenceClassification.from_pretrained(bert_model_name, from_pt=True)
-    except Exception as e:
-        raise RuntimeError(f"Error loading IndoBERT model or tokenizer: {str(e)}")
-    
-    return model_t5, tokenizer_t5, model_bert, tokenizer_bert
+# load model dan tokenizer yang telah dilatih
+model_path = 't5_text_to_text_model'
+model = TFT5ForConditionalGeneration.from_pretrained(model_path)
+tokenizer = T5Tokenizer.from_pretrained(model_path)
 
 def load_and_preprocess_data(filepath):
     """
