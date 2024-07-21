@@ -51,3 +51,10 @@ for input_text in example_inputs:
 # Simpan hasil evaluasi ke file CSV
 df = pd.DataFrame(data)
 df.to_csv('evaluation_results.csv', index=False)
+
+# Cetak hasil evaluasi
+for row in data:
+    print(f"Question: {row['question']}")
+    print(f"Generated Answer: {row['generated_answer']}")
+    print(f"Accuracy: {row['accuracy']}")
+    print("-" * 50)
