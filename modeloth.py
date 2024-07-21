@@ -63,15 +63,3 @@ def masked_accuracy(y_true, y_pred):
 # Kompilasi model dengan metrik akurasi custom
 model.compile(optimizer=optimizer, loss=compute_loss, metrics=[masked_accuracy])
 
-# Buat tf.data.Dataset
-dataset = tf.data.Dataset.from_tensor_slices((
-    {
-        'input_ids': input_ids,
-        'attention_mask': attention_masks,
-        'labels': labels
-    },
-    labels
-)).batch(5)
-  
-# Train model for more epochs
-model.fit(dataset, epochs=100)
