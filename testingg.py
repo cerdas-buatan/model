@@ -1,8 +1,6 @@
 import tensorflow as tf
-from transformers import TFT5ForConditionalGeneration, T5Tokenizer, AutoTokenizer, TFAutoModelForSequenceClassification
+from transformers import TFT5ForConditionalGeneration, T5Tokenizer
 import pandas as pd
-import csv
-from sklearn.preprocessing import LabelEncoder
 
 def load_model_and_tokenizer(model_path, bert_model_name):
     """
