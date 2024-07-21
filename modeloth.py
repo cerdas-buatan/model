@@ -54,3 +54,6 @@ optimizer = tf.keras.optimizers.Adam(learning_rate=5e-5)
 def compute_loss(labels, logits):
     return tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
 
+# Compile model
+model.compile(optimizer=optimizer, loss=compute_loss)
+
