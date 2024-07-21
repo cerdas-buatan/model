@@ -13,3 +13,6 @@ with open('dataset_clean2.csv', 'r', encoding='utf-8') as file:
         parts = line.strip().split('|')
         if len(parts) == 2:  # Hanya memproses baris dengan tepat dua bagian
             rows.append(parts)
+
+# Konversi baris yang telah dibersihkan ke DataFrame
+df = pd.DataFrame(rows, columns=['question', 'answer'])
