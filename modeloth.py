@@ -80,16 +80,3 @@ model.fit(dataset, epochs=100)
 model_path = 't5_text_to_text_model'
 model.save_pretrained(model_path)
 tokenizer.save_pretrained(model_path)
-
-# Inisialisasi daftar kosong untuk menyimpan baris yang telah dibersihkan
-rows = []
-  
-# Read and clean dataset, handling any anomalies
-with open('dataset_clean2.csv', 'r', encoding='utf-8') as file:
-    for line_number, line in enumerate(file):
-        # Pisahkan baris berdasarkan '|' dan tangani baris yang tidak terduga
-        parts = line.strip().split('|')
-        if len(parts) == 2:  # Hanya memproses baris dengan tepat dua bagian
-            rows.append(parts)
-
-
