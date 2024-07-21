@@ -42,5 +42,10 @@ while True:
     if input_text.lower() == 'exit':
         break
 
+        # Menghasilkan teks jawaban berdasarkan input
+    generated_text = generate_text(input_text)
+    print("Jawaban dari model:")
+    print(generated_text)
+
 
 
