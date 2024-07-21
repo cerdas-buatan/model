@@ -58,3 +58,9 @@ for row in data:
     print(f"Generated Answer: {row['generated_answer']}")
     print(f"Accuracy: {row['accuracy']}")
     print("-" * 50)
+
+
+# Fungsi untuk load dan display hasil dari file CSV
+def load_and_display_results(csv_file):
+    df = pd.read_csv(csv_file)
+    print(df)
