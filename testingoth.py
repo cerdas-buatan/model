@@ -47,5 +47,10 @@ while True:
     print("Jawaban dari model:")
     print(generated_text)
 
+    # Mengevaluasi akurasi
+    accuracy = evaluate_accuracy(input_text, generated_text)
+
+    # Menyimpan pertanyaan, jawaban, dan akurasi ke dalam daftar data
+    data.append({"Pertanyaan": input_text, "Jawaban": generated_text, "Akurasi": accuracy})
 
 
