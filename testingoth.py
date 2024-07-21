@@ -14,9 +14,9 @@ data = []
 def generate_text(input_text):
     try:
         # Tokenisasi input
-        inputs = tokenizer.encode_plus(input_text, return_tensors='tf', add_special_tokens=True, max_length=64, padding='max_length', truncation=True)
-        input_ids = inputs['input_ids']
-        attention_mask = inputs['attention_mask']
+        inputs = tokenizer.encode_plus(input_text, return_tensors='tf', add_special_tokens=True, max_length=64, padding='max_length', truncation=True) 
+        input_ids = inputs['input_ids'] 
+        attention_mask = inputs['attention_mask'] 
 
          # Menghasilkan teks dari model
         outputs = model.generate(input_ids, attention_mask=attention_mask, max_length=64, num_beams=4, early_stopping=True)
@@ -24,8 +24,8 @@ def generate_text(input_text):
   # dekode output yang dihasilkan
         output_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-        return output_text
-    except Exception as e:
+        return output_text 
+    except Exception as e: 
         return f"Error dalam menghasilkan teks: {str(e)}"
     
 
