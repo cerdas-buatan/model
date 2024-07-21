@@ -24,3 +24,14 @@ tokenizer = T5Tokenizer.from_pretrained('t5-small')
 input_ids = []
 attention_masks = []
 labels = []
+
+for index, row in df.iterrows():
+    encoded_input = tokenizer.encode_plus(row['question'], add_special_tokens=True, max_length=64, padding='max_length', return_attention_mask=True, truncation=True)
+    encoded_output = tokenizer.encode_plus(row['answer'], add_special_tokens=True, max_length=64, padding='max_length', return_attention_mask=True, truncation=True)
+
+    input_ids.append(encoded_input['input_ids'])
+    attention_masks.append(encoded_input['attention_mask'])
+    # Geser label ke kanan untuk model
+    label_ids = encoded_output['input_ids']
+    label_ids = [tokenizer.pad_token_id] + label_ids[:-1]  # Geser ke kanan
+    labels.append(label_ids)
