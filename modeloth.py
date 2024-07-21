@@ -73,3 +73,12 @@ for epoch in range(epochs):
         gradients = tape.gradient(loss, model.trainable_variables)
         optimizer.apply_gradients(zip(gradients, model.trainable_variables))
         print(f'Loss: {loss.numpy()}')
+
+# Evaluasi model
+def evaluate_model(model, tokenizer, question, answer):
+    input_ids = tokenizer.encode(question, return_tensors='tf')
+    generated_ids = model.generate(input_ids, max_length=64, num_beams=4, early_stopping=True)
+    generated_answer = tokenizer.decode(generated_ids[0], skip_special_tokens=True)
+    print(f'Question: {question}')
+    print(f'Expected Answer: {answer}')
+    print(f'Generated Answer: {generated_answer}')
