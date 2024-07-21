@@ -35,5 +35,10 @@ def evaluate_accuracy(input_text, generated_text):
     # Dalam kasus nyata, ini harus membandingkan teks yang dihasilkan dengan jawaban yang diharapkan.
     return "Akurasi Placeholder"
 
-
+# Contoh input untuk evaluasi
+example_inputs = [
+    "Apa itu machine learning?",
+    "Bagaimana cara kerja jaringan syaraf tiruan?",
+    "Jelaskan konsep pengelompokan data dalam data mining."
+]
 
