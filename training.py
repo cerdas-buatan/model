@@ -53,3 +53,22 @@ optimizer = tf.keras.optimizers.Adam(learning_rate=5e-5)
 def compute_loss(labels, logits):
     return tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
 
+# Compile model
+model.compile(optimizer=optimizer, loss=compute_loss) 
+
+# Definisikan dataset untuk training 
+dataset = tf.data.Dataset.from_tensor_slices(({"input_ids": input_ids, "attention_mask": attention_masks}, labels))
+dataset = dataset.shuffle(buffer_size=1024).batch(10) 
+
+# Training loop 
+epochs = 3   
+for epoch in range(epochs):     
+    print(f'Epoch {epoch + 1}/{epochs}') 
+    for batch in dataset: 
+        inputs, targets = batch 
+        with tf.GradientTape() as tape: 
+            outputs = model(inputs, labels=targets) 
+            loss = outputs.loss 
+        gradients = tape.gradient(loss, model.trainable_variables) 
+        optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+        print(f'Loss: {loss.numpy()}') 
