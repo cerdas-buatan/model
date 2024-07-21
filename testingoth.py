@@ -30,13 +30,13 @@ def generate_text(input_text):
     
 
 # Fungsi mengevaluasi akurasi teks yang dihasilkan (placeholder untuk implementasi sebenarnya)
-def evaluate_accuracy(input_text, generated_text):
+def evaluate_accuracy(input_text, generated_text): 
     # Untuk kesederhanaan, kita mengembalikan nilai akurasi placeholder.
     # Dalam kasus nyata, ini harus membandingkan teks yang dihasilkan dengan jawaban yang diharapkan.
-    return "Akurasi Placeholder"
+    return "Akurasi Placeholder" 
 
 # Contoh input untuk evaluasi
-example_inputs = [
+example_inputs = [ 
     "Apa itu machine learning?",
     "Bagaimana cara kerja jaringan syaraf tiruan?",
     "Jelaskan konsep pengelompokan data dalam data mining."
