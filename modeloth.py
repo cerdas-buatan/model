@@ -62,17 +62,17 @@ dataset = tf.data.Dataset.from_tensor_slices(({"input_ids": input_ids, "attentio
 dataset = dataset.shuffle(buffer_size=1024).batch(16)
 
 # Training loop 
-epochs = 3 
-for epoch in range(epochs): 
-    print(f'Epoch {epoch + 1}/{epochs}')
-    for batch in dataset:
-        inputs, targets = batch
-        with tf.GradientTape() as tape:
-            outputs = model(inputs, labels=targets)
-            loss = outputs.loss
-        gradients = tape.gradient(loss, model.trainable_variables)
+epochs = 3   
+for epoch in range(epochs):     
+    print(f'Epoch {epoch + 1}/{epochs}') 
+    for batch in dataset: 
+        inputs, targets = batch 
+        with tf.GradientTape() as tape: 
+            outputs = model(inputs, labels=targets) 
+            loss = outputs.loss 
+        gradients = tape.gradient(loss, model.trainable_variables) 
         optimizer.apply_gradients(zip(gradients, model.trainable_variables))
-        print(f'Loss: {loss.numpy()}')
+        print(f'Loss: {loss.numpy()}') 
 
 # Evaluasi model
 def evaluate_model(model, tokenizer, question, answer):
