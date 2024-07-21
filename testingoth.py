@@ -18,5 +18,8 @@ def generate_text(input_text):
         input_ids = inputs['input_ids']
         attention_mask = inputs['attention_mask']
 
+         # Menghasilkan teks dari model
+        outputs = model.generate(input_ids, attention_mask=attention_mask, max_length=64, num_beams=4, early_stopping=True)
+
 
 
