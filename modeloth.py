@@ -55,11 +55,11 @@ def compute_loss(labels, logits):
     return tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
 
 # Compile model
-model.compile(optimizer=optimizer, loss=compute_loss)
+model.compile(optimizer=optimizer, loss=compute_loss) 
 
-# Definisikan dataset untuk training
+# Definisikan dataset untuk training 
 dataset = tf.data.Dataset.from_tensor_slices(({"input_ids": input_ids, "attention_mask": attention_masks}, labels))
-dataset = dataset.shuffle(buffer_size=1024).batch(16)
+dataset = dataset.shuffle(buffer_size=1024).batch(10) 
 
 # Training loop 
 epochs = 3   
