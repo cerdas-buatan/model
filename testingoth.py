@@ -42,3 +42,12 @@ example_inputs = [
     "Jelaskan konsep pengelompokan data dalam data mining."
 ]
 
+# Evaluasi beberapa contoh input
+for input_text in example_inputs:
+    generated_text = generate_text(input_text)
+    accuracy = evaluate_accuracy(input_text, generated_text)
+    data.append({'question': input_text, 'generated_answer': generated_text, 'accuracy': accuracy})
+
+# Simpan hasil evaluasi ke file CSV
+df = pd.DataFrame(data)
+df.to_csv('evaluation_results.csv', index=False)
