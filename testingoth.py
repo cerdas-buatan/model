@@ -64,3 +64,6 @@ for row in data:
 def load_and_display_results(csv_file):
     df = pd.read_csv(csv_file)
     print(df)
+
+# Display hasil evaluasi yang disimpan
+load_and_display_results('evaluation_results.csv')
