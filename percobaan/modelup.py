@@ -8,6 +8,11 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Embedding, SimpleRNN, Dense
 from tensorflow.keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
+from tensorflow.keras.mixed_precision import experimental as mixed_precision
+
+# Enable mixed precision training
+policy = mixed_precision.Policy('mixed_float16')
+mixed_precision.set_global_policy(policy)
 
 # Define a function to clean text
 def clean_text(text):
@@ -19,7 +24,9 @@ def clean_text(text):
     return text
 
 # Function to prepare data for RNN
-def prepare_data(df):
+MAX_LEN = 100  # Set a maximum sequence length
+
+def prepare_data(df, max_len=MAX_LEN):
     tokenizer = Tokenizer()
     tokenizer.fit_on_texts(df['question'])
     tokenizer.fit_on_texts(df['answer'])
@@ -28,8 +35,6 @@ def prepare_data(df):
 
     X = tokenizer.texts_to_sequences(df['question'])
     y = tokenizer.texts_to_sequences(df['answer'])
-
-    max_len = max(max(len(x) for x in X), max(len(y) for y in y))
 
     X_pad = pad_sequences(X, maxlen=max_len, padding='post')
     y_pad = pad_sequences(y, maxlen=max_len, padding='post')
@@ -42,8 +47,8 @@ def prepare_data(df):
 def build_rnn_model(vocab_size, max_len):
     model = Sequential([
         Embedding(input_dim=vocab_size, output_dim=64, input_length=max_len),
-        SimpleRNN(128, return_sequences=True),
-        Dense(vocab_size, activation='softmax')
+        SimpleRNN(128, return_sequences=True, dtype='float32'),  # Use float32 for RNN
+        Dense(vocab_size, activation='softmax', dtype='float32')  # Use float32 for Dense
     ])
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
     return model
@@ -76,13 +81,8 @@ def normalize_text_rnn(texts, tokenizer, model, batch_size=1024):
     sequences_pad = pad_sequences(sequences, maxlen=max_len, padding='post')
 
     normalized_texts = []
-    num_batches = len(sequences_pad) // batch_size + 1
-
-    for i in range(num_batches):
-        start = i * batch_size
-        end = start + batch_size
-        batch_sequences = sequences_pad[start:end]
-
+    for i in range(0, len(sequences_pad), batch_size):
+        batch_sequences = sequences_pad[i:i+batch_size]
         predictions = model.predict(batch_sequences)
         
         for pred in predictions:
