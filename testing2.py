@@ -50,4 +50,10 @@ while True:
     # Mengevaluasi akurasi
     accuracy = evaluate_accuracy(input_text, generated_text)
 
+    # Menyimpan pertanyaan, jawaban, dan akurasi ke dalam daftar data
+    data.append({"Pertanyaan": input_text, "Jawaban": generated_text, "Akurasi": accuracy})
 
+# Menyimpan data testing ke file Excel
+df = pd.DataFrame(data)
+df.to_excel("hasil_test.xlsx", index=False)
+print("Data berhasil disimpan ke hasil_test.xlsx")
