@@ -60,7 +60,7 @@ def train_rnn_model(df):
     return tokenizer
 
 # Load dataset
-df = pd.read_csv('dataset_clean.csv', sep='|', dtype={'question': 'string', 'answer': 'string'})
+df = pd.read_csv('data.csv', sep='|', dtype={'question': 'string', 'answer': 'string'})
 
 # Clean the dataset
 df['question'] = df['question'].apply(clean_text)
@@ -70,18 +70,25 @@ df['answer'] = df['answer'].apply(clean_text)
 tokenizer = train_rnn_model(df)
 
 # Normalize text using the trained RNN model
-def normalize_text_rnn(texts, tokenizer, model):
+def normalize_text_rnn(texts, tokenizer, model, batch_size=1024):
     sequences = tokenizer.texts_to_sequences(texts)
     max_len = max(len(seq) for seq in sequences)
     sequences_pad = pad_sequences(sequences, maxlen=max_len, padding='post')
 
-    predictions = model.predict(sequences_pad)
     normalized_texts = []
-    
-    for pred in predictions:
-        seq = np.argmax(pred, axis=-1)
-        text = tokenizer.sequences_to_texts([seq])[0]
-        normalized_texts.append(text)
+    num_batches = len(sequences_pad) // batch_size + 1
+
+    for i in range(num_batches):
+        start = i * batch_size
+        end = start + batch_size
+        batch_sequences = sequences_pad[start:end]
+
+        predictions = model.predict(batch_sequences)
+        
+        for pred in predictions:
+            seq = np.argmax(pred, axis=-1)
+            text = tokenizer.sequences_to_texts([seq])[0]
+            normalized_texts.append(text)
     
     return normalized_texts
 
