@@ -1,104 +1,107 @@
-import pandas as pd
-import re
-import gc
-import numpy as np
 import tensorflow as tf
-from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Embedding, SimpleRNN, Dense
-from tensorflow.keras.utils import to_categorical
-from sklearn.model_selection import train_test_split
+from transformers import TFT5ForConditionalGeneration, T5Tokenizer
+import pandas as pd
+import os
 
-# Define a function to clean text
-def clean_text(text):
-    if pd.isna(text):  # Handle NaN values
-        return ""
-    text = text.replace("iteung", "gays")
-    text = re.sub(r'[^A-Za-z\s]', '', text)  # Remove non-alphabetic characters
-    text = re.sub(r'\s+', ' ', text).strip()  # Remove extra spaces
+# Path to the local dataset file
+dataset_path = 'data.csv'
+
+# Load the dataset from a local file
+df = pd.read_csv(dataset_path, delimiter='|', header=None, names=['question', 'answer'])
+
+# Preprocessing and normalization function
+def preprocess_text(text):
+    # Example preprocessing: lowercasing and removing extra spaces
+    text = text.lower().strip()
     return text
 
-# Function to prepare data for RNN
-MAX_LEN = 100  # Set a maximum sequence length
+# Apply preprocessing to the dataset
+df['question'] = df['question'].apply(preprocess_text)
+df['answer'] = df['answer'].apply(preprocess_text)
 
-def prepare_data(df, max_len=MAX_LEN):
-    tokenizer = Tokenizer()
-    tokenizer.fit_on_texts(df['question'])
-    tokenizer.fit_on_texts(df['answer'])
-    
-    vocab_size = len(tokenizer.word_index) + 1
+# Initialize the tokenizer
+tokenizer = T5Tokenizer.from_pretrained('t5-small')
 
-    X = tokenizer.texts_to_sequences(df['question'])
-    y = tokenizer.texts_to_sequences(df['answer'])
+# Tokenize the input and output sequences
+input_ids = []
+attention_masks = []
+labels = []
 
-    X_pad = pad_sequences(X, maxlen=max_len, padding='post')
-    y_pad = pad_sequences(y, maxlen=max_len, padding='post')
+for index, row in df.iterrows():
+    encoded_input = tokenizer.encode_plus(row['question'], add_special_tokens=True, max_length=64, padding='max_length', return_attention_mask=True, truncation=True)
+    encoded_output = tokenizer.encode_plus(row['answer'], add_special_tokens=True, max_length=64, padding='max_length', return_attention_mask=True, truncation=True)
 
-    y_pad = to_categorical(y_pad, num_classes=vocab_size)
+    input_ids.append(encoded_input['input_ids'])
+    attention_masks.append(encoded_input['attention_mask'])
+    # Shift the labels to the right for the model
+    label_ids = encoded_output['input_ids']
+    label_ids = [tokenizer.pad_token_id] + label_ids[:-1]  # Shift right
+    labels.append(label_ids)
 
-    return X_pad, y_pad, tokenizer, vocab_size, max_len
+input_ids = tf.constant(input_ids)
+attention_masks = tf.constant(attention_masks)
+labels = tf.constant(labels)
 
-# Build RNN model
-def build_rnn_model(vocab_size, max_len):
-    model = Sequential([
-        Embedding(input_dim=vocab_size, output_dim=64, input_length=max_len),
-        SimpleRNN(128, return_sequences=True),  # Removed dtype specification
-        Dense(vocab_size, activation='softmax')  # Removed dtype specification
-    ])
-    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-    return model
+# Load the sequence-to-sequence model
+model = TFT5ForConditionalGeneration.from_pretrained('t5-small')
 
-# Train the RNN model
-def train_rnn_model(df):
-    X_pad, y_pad, tokenizer, vocab_size, max_len = prepare_data(df)
-    X_train, X_val, y_train, y_val = train_test_split(X_pad, y_pad, test_size=0.1, random_state=42)
-    
-    model = build_rnn_model(vocab_size, max_len)
-    model.fit(X_train, y_train, epochs=5, batch_size=64, validation_data=(X_val, y_val))
-    
-    model.save('rnn_text_normalization_model.h5')
-    return tokenizer
+# Define the optimizer
+optimizer = tf.keras.optimizers.Adam(learning_rate=5e-5)
 
-# Load dataset
-df = pd.read_csv('data.csv', sep='|', dtype={'question': 'string', 'answer': 'string'})
+# Define a custom loss function
+def compute_loss(labels, logits):
+    return tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
 
-# Clean the dataset
-df['question'] = df['question'].apply(clean_text)
-df['answer'] = df['answer'].apply(clean_text)
+# Define a custom accuracy function
+def masked_accuracy(y_true, y_pred):
+    y_true = tf.cast(tf.reshape(y_true, (-1,)), tf.int64)
+    y_pred = tf.cast(tf.argmax(y_pred, axis=-1), tf.int64)
+    y_pred = tf.reshape(y_pred, (-1,))  # Ensure y_pred is reshaped to match y_true
+    accuracy = tf.equal(y_true, y_pred)
+    mask = tf.cast(tf.not_equal(y_true, tokenizer.pad_token_id), tf.float32)  # Ignore padding tokens
+    accuracy = tf.cast(accuracy, tf.float32) * mask
+    return tf.reduce_sum(accuracy) / tf.reduce_sum(mask)
 
-# Train the RNN model
-tokenizer = train_rnn_model(df)
+# Compile the model with the custom accuracy metric
+model.compile(optimizer=optimizer, loss=compute_loss, metrics=[masked_accuracy])
 
-# Normalize text using the trained RNN model
-def normalize_text_rnn(texts, tokenizer, model, batch_size=1024):
-    sequences = tokenizer.texts_to_sequences(texts)
-    max_len = max(len(seq) for seq in sequences)
-    sequences_pad = pad_sequences(sequences, maxlen=max_len, padding='post')
+# Create a tf.data.Dataset
+dataset = tf.data.Dataset.from_tensor_slices((
+    {
+        'input_ids': input_ids,
+        'attention_mask': attention_masks,
+        'labels': labels
+    },
+    labels
+)).batch(30)
 
-    normalized_texts = []
-    for i in range(0, len(sequences_pad), batch_size):
-        batch_sequences = sequences_pad[i:i+batch_size]
-        predictions = model.predict(batch_sequences).astype('float32')
-        
-        for pred in predictions:
-            seq = np.argmax(pred, axis=-1)
-            text = tokenizer.sequences_to_texts([seq])[0]
-            normalized_texts.append(text)
+# Train the model
+model.fit(dataset, epochs=100)
 
-        del batch_sequences, predictions  # Clear memory
-        gc.collect()  # Force garbage collection
-    
-    return normalized_texts
+# Save the model and tokenizer
+model_path = 't5_text_to_text_model'
+model.save_pretrained(model_path)
+tokenizer.save_pretrained(model_path)
 
-# Load the trained RNN model
-model = tf.keras.models.load_model('rnn_text_normalization_model.h5')
+# Load the model and tokenizer for generating text
+model = TFT5ForConditionalGeneration.from_pretrained(model_path)
+tokenizer = T5Tokenizer.from_pretrained(model_path)
 
-# Apply normalization to the dataset
-df = pd.read_csv('dataset_clean.csv', sep='|', dtype={'question': 'string', 'answer': 'string'})
-df['question'] = normalize_text_rnn(df['question'].fillna(''), tokenizer, model)
-df['answer'] = normalize_text_rnn(df['answer'].fillna(''), tokenizer, model)
+# Define a function to generate text based on input
+def generate_text(input_text):
+    input_ids = tokenizer.encode(input_text, return_tensors='tf', max_length=64, truncation=True, padding='max_length')
+    output_ids = model.generate(input_ids=input_ids, max_length=64, num_beams=5, early_stopping=True)
+    output_text = tokenizer.decode(output_ids[0], skip_special_tokens=True)
+    return output_text
 
-# Save the normalized dataset
-df.to_csv('dataset_normalized.csv', sep='|', index=False)
-print("Data normalized and saved successfully.")
+# Example usage
+while True:
+    input_text = input("Masukkan pertanyaan Anda (atau ketik 'exit' untuk keluar): ")
+
+    if input_text.lower() == 'exit':
+        break
+
+    # Generate text based on input
+    generated_text = generate_text(input_text)
+    print("Jawaban dari model:")
+    print(generated_text)
