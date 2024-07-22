@@ -80,3 +80,7 @@ dataset = tf.data.Dataset.from_tensor_slices((
 # Train model for more epochs
 model.fit(dataset, epochs=100)
 
+# Simpan model dan tokenizer
+model_path = 'gpt2_model'
+model.save_pretrained(model_path)
+tokenizer.save_pretrained(model_path)
