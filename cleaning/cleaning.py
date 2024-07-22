@@ -6,10 +6,13 @@ import os
 def clean_text(text):
     if pd.isna(text):  # Check if text is NaN
         return ""
-    # Replace the word "iteung" with "gays"
-    text = text.replace("iteung", "gays")
-    # Remove unwanted characters (e.g., symbols, numbers, etc.)
-    text = re.sub(r'[^A-Za-z\s]', '', text)
+    # Remove specific patterns (e.g., "nn" and "nnterimakasih")
+    text = re.sub(r'\bnn\b', '', text)  # Remove standalone "nn"
+    text = re.sub(r'n+n+', '', text)  # Remove sequences like "nnterimakasih"
+    # # Replace the word "iteung" with "gays"
+    # text = text.replace("iteung", "gays")
+    # # Remove unwanted characters (e.g., symbols, numbers, etc.)
+    # text = re.sub(r'[^A-Za-z\s]', '', text)
     # Remove extra spaces
     text = re.sub(r'\s+', ' ', text).strip()
     return text
@@ -28,6 +31,15 @@ def preprocess_csv(input_file, output_file):
         # Clean the text in 'question' and 'answer' columns
         df['question'] = df['question'].apply(clean_text)
         df['answer'] = df['answer'].apply(clean_text)
+        
+        # Remove rows with missing 'question' or 'answer'
+        df = df.dropna(subset=['question', 'answer'])
+        
+        # Remove duplicate rows
+        df = df.drop_duplicates()
+        
+        # Optionally remove rows with empty 'question' or 'answer'
+        df = df[(df['question'] != '') & (df['answer'] != '')]
         
         # Save the cleaned data to a new CSV file
         df.to_csv(output_file, sep='|', index=False)
