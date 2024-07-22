@@ -8,11 +8,6 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Embedding, SimpleRNN, Dense
 from tensorflow.keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
-from tensorflow.keras.mixed_precision import experimental as mixed_precision
-
-# Enable mixed precision training
-policy = mixed_precision.Policy('mixed_float16')
-mixed_precision.set_global_policy(policy)
 
 # Define a function to clean text
 def clean_text(text):
@@ -47,8 +42,8 @@ def prepare_data(df, max_len=MAX_LEN):
 def build_rnn_model(vocab_size, max_len):
     model = Sequential([
         Embedding(input_dim=vocab_size, output_dim=64, input_length=max_len),
-        SimpleRNN(128, return_sequences=True, dtype='float32'),  # Use float32 for RNN
-        Dense(vocab_size, activation='softmax', dtype='float32')  # Use float32 for Dense
+        SimpleRNN(128, return_sequences=True),  # Removed dtype specification
+        Dense(vocab_size, activation='softmax')  # Removed dtype specification
     ])
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
     return model
