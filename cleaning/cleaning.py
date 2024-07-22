@@ -10,7 +10,7 @@ def clean_text(text):
     text = re.sub(r'\bnn\b', '', text)  # Remove standalone "nn"
     text = re.sub(r'n+n+', '', text)  # Remove sequences like "nnterimakasih"
     # # Replace the word "iteung" with "gays"
-    # text = text.replace("iteung", "gays")
+    text = text.replace("iteung", "disal")
     # # Remove unwanted characters (e.g., symbols, numbers, etc.)
     # text = re.sub(r'[^A-Za-z\s]', '', text)
     # Remove extra spaces
@@ -48,6 +48,6 @@ def preprocess_csv(input_file, output_file):
         print(f"An error occurred: {e}")
 
 # Example usage
-input_file = 'data.csv'  # Input file with raw data
-output_file = 'data_clean.csv'  # Output file for cleaned data
+input_file = 'data_clean.csv'  # Input file with raw data
+output_file = 'data_cleaned.csv'  # Output file for cleaned data
 preprocess_csv(input_file, output_file)
