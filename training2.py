@@ -35,3 +35,15 @@ for index, row in df.iterrows():
     input_ids.append(encoded_input)
     labels.append(encoded_output)
 
+# Padding untuk input_ids dan labels
+max_length = max(len(ids) for ids in input_ids)
+input_ids = tf.keras.preprocessing.sequence.pad_sequences(input_ids, maxlen=max_length, padding='post')
+labels = tf.keras.preprocessing.sequence.pad_sequences(labels, maxlen=max_length, padding='post')
+
+# Konversi ke TensorFlow tensor
+input_ids = tf.constant(input_ids)
+labels = tf.constant(labels)
+
+# Muat model GPT-2
+model = TFGPT2LMHeadModel.from_pretrained('gpt2')
+
