@@ -1,5 +1,6 @@
 import pandas as pd
 import re
+import gc
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.preprocessing.text import Tokenizer
@@ -78,12 +79,15 @@ def normalize_text_rnn(texts, tokenizer, model, batch_size=1024):
     normalized_texts = []
     for i in range(0, len(sequences_pad), batch_size):
         batch_sequences = sequences_pad[i:i+batch_size]
-        predictions = model.predict(batch_sequences)
+        predictions = model.predict(batch_sequences).astype('float32')
         
         for pred in predictions:
             seq = np.argmax(pred, axis=-1)
             text = tokenizer.sequences_to_texts([seq])[0]
             normalized_texts.append(text)
+
+        del batch_sequences, predictions  # Clear memory
+        gc.collect()  # Force garbage collection
     
     return normalized_texts
 
