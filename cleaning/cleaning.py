@@ -55,7 +55,7 @@ def preprocess_csv(input_file, output_file, pattern_to_remove):
         print(f"An error occurred: {e}")
 
 # Example usage
-input_file = 'data_clean6.csv'  # Input file with raw data
-output_file = 'data_clean7.csv'  # Output file for cleaned data
-pattern_to_remove = 'teung input absen pkkmb'  # Pattern to remove
+input_file = 'data_clean7.csv'  # Input file with raw data
+output_file = 'data_clean8.csv'  # Output file for cleaned data
+pattern_to_remove = 'teung input absensi PKKMB'  # Pattern to remove
 preprocess_csv(input_file, output_file, pattern_to_remove)
