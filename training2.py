@@ -19,8 +19,8 @@ df = pd.DataFrame(rows, columns=['question', 'answer'])
 # Mengatasi missing values
 df.dropna(inplace=True)
 
-# Inisialisasi tokenizer
-tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+# Inisialisasi CountVectorizer
+vectorizer = CountVectorizer()
 
 # Tokenisasi input dan output sequence
 input_ids = []
