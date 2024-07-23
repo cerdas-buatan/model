@@ -22,22 +22,11 @@ df.dropna(inplace=True)
 # Inisialisasi CountVectorizer
 vectorizer = CountVectorizer()
 
-# Tokenisasi input dan output sequence
-input_ids = []
-attention_masks = []
-labels = []
+# Gabungkan kolom 'question' dan 'answer' untuk representasi BoW
+combined_texts = df['question'] + " " + df['answer']
 
-for index, row in df.iterrows():
-    encoded_input = tokenizer.encode(row['question'], add_special_tokens=True, max_length=64, padding='max_length', truncation=True)
-    encoded_output = tokenizer.encode(row['answer'], add_special_tokens=True, max_length=64, padding='max_length', truncation=True)
-
-    input_ids.append(encoded_input)
-    labels.append(encoded_output)
-
-# Padding untuk input_ids dan labels
-max_length = max(len(ids) for ids in input_ids)
-input_ids = tf.keras.preprocessing.sequence.pad_sequences(input_ids, maxlen=max_length, padding='post')
-labels = tf.keras.preprocessing.sequence.pad_sequences(labels, maxlen=max_length, padding='post')
+# Fit dan transform teks ke BoW
+bow_matrix = vectorizer.fit_transform(combined_texts)
 
 # Konversi ke TensorFlow tensor
 input_ids = tf.constant(input_ids)
