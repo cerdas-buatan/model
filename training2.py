@@ -31,33 +31,8 @@ bow_matrix = vectorizer.fit_transform(combined_texts)
 # Konversi BoW matrix ke DataFrame
 bow_df = pd.DataFrame(bow_matrix.toarray(), columns=vectorizer.get_feature_names_out())
 
-# Definisikan fungsi akurasi custom
-def masked_accuracy(y_true, y_pred):
-    y_true = tf.cast(tf.reshape(y_true, (-1,)), tf.int64)
-    y_pred = tf.cast(tf.argmax(y_pred, axis=-1), tf.int64)
-    y_pred = tf.reshape(y_pred, (-1,))  # Pastikan y_pred diubah bentuknya agar sesuai dengan y_true
-    accuracy = tf.equal(y_true, y_pred)
-    mask = tf.cast(tf.not_equal(y_true, tokenizer.pad_token_id), tf.float32)  # Abaikan token padding
-    accuracy = tf.cast(accuracy, tf.float32) * mask
-    return tf.reduce_sum(accuracy) / tf.reduce_sum(mask)
+# Tampilkan beberapa baris dari DataFrame BoW
+print(bow_df.head())
 
-# Kompilasi model dengan metrik akurasi custom
-model.compile(optimizer=optimizer, loss=compute_loss, metrics=[masked_accuracy])
-
-# Buat tf.data.Dataset
-dataset = tf.data.Dataset.from_tensor_slices((
-    {
-        'input_ids': input_ids,
-        'attention_mask': attention_masks,
-        'labels': labels
-    },
-    labels
-)).batch(5)
-  
-# Train model for more epochs
-model.fit(dataset, epochs=100)
-
-# Simpan model dan tokenizer
-model_path = 'gpt2_model'
-model.save_pretrained(model_path)
-tokenizer.save_pretrained(model_path)
+# Simpan BoW dataframe ke file CSV jika diperlukan
+bow_df.to_csv('bow_representation.csv', index=False)
