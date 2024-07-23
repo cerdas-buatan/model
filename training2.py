@@ -28,19 +28,8 @@ combined_texts = df['question'] + " " + df['answer']
 # Fit dan transform teks ke BoW
 bow_matrix = vectorizer.fit_transform(combined_texts)
 
-# Konversi ke TensorFlow tensor
-input_ids = tf.constant(input_ids)
-labels = tf.constant(labels)
-
-# Muat model GPT-2
-model = TFGPT2LMHeadModel.from_pretrained('gpt2')
-
-# Definisikan optimizer
-optimizer = tf.keras.optimizers.Adam(learning_rate=5e-5)
-
-# Definisikan fungsi loss custom
-def compute_loss(labels, logits):
-    return tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
+# Konversi BoW matrix ke DataFrame
+bow_df = pd.DataFrame(bow_matrix.toarray(), columns=vectorizer.get_feature_names_out())
 
 # Definisikan fungsi akurasi custom
 def masked_accuracy(y_true, y_pred):
