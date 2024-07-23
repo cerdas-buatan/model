@@ -1,7 +1,6 @@
-# import yg di butuhkan
-import tensorflow as tf
-from transformers import TFGPT2LMHeadModel, GPT2Tokenizer
+# import yang di butuhkan
 import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer
 
 # Inisialisasi daftar kosong untuk menyimpan baris yang telah dibersihkan
 rows = []
