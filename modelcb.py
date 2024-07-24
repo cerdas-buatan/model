@@ -78,6 +78,3 @@ model.fit(dataset, epochs=100)
 model_path = 't5_text_to_text_model'
 model.save_pretrained(model_path)
 tokenizer.save_pretrained(model_path)
-
-# Compile model
-model.compile(optimizer=optimizer, loss=compute_loss) 
