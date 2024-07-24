@@ -1,6 +1,5 @@
 import numpy as np
-import pandas as pd
-import tensorflow as tf
+
 #from tensorflow.keras.layers import Embedding, LSTM, Dense, Input
 #from tensorflow.keras.models import Model
 #from tensorflow.keras.optimizers import Adam
