@@ -55,6 +55,13 @@ class Seq2Seq:
         print(f'Test Accuracy: {results[1]}')
         return results
 
+    def evaluate(self, X_test, y_test):
+        y_test = np.expand_dims(y_test, axis=-1)
+        results = self.model.evaluate([X_test, y_test[:, :-1]], y_test[:, 1:])
+        print(f'Test Loss: {results[0]}')
+        print(f'Test Accuracy: {results[1]}')
+        return results
+    
 def preprocess_data(questions, answers, xseq_len, yseq_len, num_words):
     tokenizer = Tokenizer(num_words=num_words, oov_token='<OOV>')
     tokenizer.fit_on_texts(np.concatenate((questions, answers)))
