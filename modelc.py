@@ -84,10 +84,6 @@ data['answer'] = data['answer'].astype(str).fillna('')
 questions, answers = data['question'].values, data['answer'].values
 
 
-# Set parameters
-xseq_len, yseq_len, num_words, emb_dim, num_layers = 25, 25, 1500, 130, 3
-#xseq_len, yseq_len, num_words, emb_dim, num_layers = 25, 25, 1500, 130, 3
-
 # Preprocess the data
 X, y, tokenizer = preprocess_data(questions, answers, xseq_len, yseq_len, num_words)
 
