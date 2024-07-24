@@ -36,3 +36,7 @@ for index, row in df.iterrows():
     label_ids = encoded_output['input_ids']
     label_ids = [tokenizer.pad_token_id] + label_ids[:-1]  # Geser ke kanan
     labels.append(label_ids)
+
+    input_ids = tf.constant(input_ids)
+attention_masks = tf.constant(attention_masks)
+labels = tf.constant(labels)
