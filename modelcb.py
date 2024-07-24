@@ -16,3 +16,6 @@ with open('dataset_clean2.csv', 'r', encoding='utf-8') as file:
 
 # Konversi baris yang telah dibersihkan ke DataFrame
 df = pd.DataFrame(rows, columns=['question', 'answer'])
+
+# Inisialisasi tokenizer
+tokenizer = T5Tokenizer.from_pretrained('t5-small')
