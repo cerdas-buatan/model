@@ -32,11 +32,3 @@ for index, row in df.iterrows():
     input_ids.append(encoded_input['input_ids'])
     attention_masks.append(encoded_input['attention_mask'])
 
-    # Geser label ke kanan untuk model
-    label_ids = encoded_output['input_ids']
-    label_ids = [tokenizer.pad_token_id] + label_ids[:-1]  # Geser ke kanan
-    labels.append(label_ids)
-
-    input_ids = tf.constant(input_ids)
-attention_masks = tf.constant(attention_masks)
-labels = tf.constant(labels)
