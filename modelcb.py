@@ -112,12 +112,3 @@ def evaluate_model(model, tokenizer, question, answer):
 test_question = "Apa itu machine learning?"
 test_answer = "Machine learning adalah cabang dari kecerdasan buatan yang berfokus pada pengembangan algoritma yang memungkinkan komputer belajar dari data."
 evaluate_model(model, tokenizer, test_question, test_answer)
-
-class Seq2Seq:
-    def __init__(self, xseq_len, yseq_len, vocab_size, emb_dim, num_layers):
-        self.xseq_len = xseq_len
-        self.yseq_len = yseq_len
-        self.vocab_size = vocab_size
-        self.emb_dim = emb_dim
-        self.num_layers = num_layers
-        self.build_model()
