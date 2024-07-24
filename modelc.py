@@ -63,6 +63,13 @@ def preprocess_data(questions, answers, xseq_len, yseq_len, num_words):
     return X, y, tokenizer
 
 
+def preprocess_data(questions, answers, xseq_len, yseq_len, num_words):
+    tokenizer = Tokenizer(num_words=num_words, oov_token='<OOV>')
+    tokenizer.fit_on_texts(np.concatenate((questions, answers)))
+    X = pad_sequences(tokenizer.texts_to_sequences(questions), maxlen=xseq_len, padding='post')
+    y = pad_sequences(tokenizer.texts_to_sequences(answers), maxlen=yseq_len, padding='post')
+    return X, y, tokenizer
+
 # Load and preprocess the dataset
 data = pd.read_csv('dataset_clean2.csv')
 data['question'] = data['question'].astype(str).fillna('')
