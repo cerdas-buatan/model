@@ -17,7 +17,6 @@ import matplotlib.pyplot as plt
 # Disable oneDNN optimizations warning
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
-
 class Seq2Seq:
     def __init__(self, xseq_len, yseq_len, vocab_size, emb_dim, num_layers):
         self.xseq_len = xseq_len
@@ -27,14 +26,12 @@ class Seq2Seq:
         self.num_layers = num_layers
         self.build_model()
 
-
     def build_model(self):
         # Encoder
         encoder_inputs = Input(shape=(self.xseq_len,), name='encoder_inputs')
         enc_emb = Embedding(self.vocab_size, self.emb_dim, mask_zero=True)(encoder_inputs)
         encoder_outputs, state_h, state_c = LSTM(self.emb_dim, return_state=True, name='encoder_lstm')(enc_emb)
         encoder_states = [state_h, state_c]
-
 
         # Decoder
         decoder_inputs = Input(shape=(self.yseq_len,), name='decoder_inputs')
