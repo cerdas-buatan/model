@@ -47,3 +47,8 @@ model = TFT5ForConditionalGeneration.from_pretrained('t5-small')
 # Definisikan fungsi loss custom
 def compute_loss(labels, logits):
     return tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
+# Definisikan fungsi akurasi custom
+def masked_accuracy(y_true, y_pred):
+    y_true = tf.cast(tf.reshape(y_true, (-1,)), tf.int64)
+    y_pred = tf.cast(tf.argmax(y_pred, axis=-1), tf.int64)
+    y_pred = tf.reshape(y_pred, (-1,)) 
