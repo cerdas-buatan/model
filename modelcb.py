@@ -43,3 +43,7 @@ labels = tf.constant(labels)
 
 # Muat model sequence-to-sequence
 model = TFT5ForConditionalGeneration.from_pretrained('t5-small')
+
+# Definisikan fungsi loss custom
+def compute_loss(labels, logits):
+    return tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
