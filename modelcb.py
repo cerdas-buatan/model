@@ -70,3 +70,6 @@ dataset = tf.data.Dataset.from_tensor_slices((
     },
     labels
 )).batch(5)
+
+# Train model for more epochs
+model.fit(dataset, epochs=100)
