@@ -11,7 +11,9 @@ import os
 import matplotlib.pyplot as plt
 
 # Disable oneDNN optimizations warning
+# Disable oneDNN optimizations warning
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
 
 class Seq2Seq:
     def __init__(self, xseq_len, yseq_len, vocab_size, emb_dim, num_layers):
@@ -22,12 +24,14 @@ class Seq2Seq:
         self.num_layers = num_layers
         self.build_model()
 
+
     def build_model(self):
         # Encoder
         encoder_inputs = Input(shape=(self.xseq_len,), name='encoder_inputs')
         enc_emb = Embedding(self.vocab_size, self.emb_dim, mask_zero=True)(encoder_inputs)
         encoder_outputs, state_h, state_c = LSTM(self.emb_dim, return_state=True, name='encoder_lstm')(enc_emb)
         encoder_states = [state_h, state_c]
+
 
         # Decoder
         decoder_inputs = Input(shape=(self.yseq_len,), name='decoder_inputs')
@@ -36,14 +40,17 @@ class Seq2Seq:
         decoder_outputs, _, _ = decoder_lstm(dec_emb, initial_state=encoder_states)
         decoder_outputs = Dense(self.vocab_size, activation='softmax', name='decoder_dense')(decoder_outputs)
 
+
         # Define and compile the model
         self.model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
         self.model.compile(optimizer=Adam(), loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+
 
     def train(self, X_train, y_train, batch_size, epochs):
         y_train = np.expand_dims(y_train, axis=-1)
         history = self.model.fit([X_train, y_train[:, :-1]], y_train[:, 1:], batch_size=batch_size, epochs=epochs, validation_split=0.1)
         return history
+
 
     def evaluate(self, X_test, y_test):
         y_test = np.expand_dims(y_test, axis=-1)
@@ -52,12 +59,14 @@ class Seq2Seq:
         print(f'Test Accuracy: {results[1]}')
         return results
 
+
 def preprocess_data(questions, answers, xseq_len, yseq_len, num_words):
     tokenizer = Tokenizer(num_words=num_words, oov_token='<OOV>')
     tokenizer.fit_on_texts(np.concatenate((questions, answers)))
     X = pad_sequences(tokenizer.texts_to_sequences(questions), maxlen=xseq_len, padding='post')
     y = pad_sequences(tokenizer.texts_to_sequences(answers), maxlen=yseq_len, padding='post')
     return X, y, tokenizer
+
 
 # Load and preprocess the dataset
 data = pd.read_csv('dataset_clean2.csv')
