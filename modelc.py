@@ -66,7 +66,7 @@ def preprocess_data(questions, answers, xseq_len, yseq_len, num_words):
     y = pad_sequences(tokenizer.texts_to_sequences(answers), maxlen=yseq_len, padding='post')
     return X, y, tokenizer
 
-# Load and preprocess the dataset
+
 # Load and preprocess the dataset
 data = pd.read_csv('dataset_clean2.csv')
 data['question'] = data['question'].astype(str).fillna('')
