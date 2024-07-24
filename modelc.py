@@ -110,3 +110,6 @@ plt.ylabel('Loss')
 plt.xlabel('Epoch')
 plt.legend(['Train', 'Validation'], loc='upper left')
 plt.show()
+
+# Inisialisasi daftar kosong untuk menyimpan baris yang telah dibersihkan
+rows = []
