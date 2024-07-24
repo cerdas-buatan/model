@@ -97,6 +97,9 @@ history = model.train(X_train, y_train, batch_size=16, epochs=3)
 # Evaluate the model
 results = model.evaluate(X_test, y_test)
 
+# Evaluate the model
+results = model.evaluate(X_test, y_test)
+
 # Plot training & validation accuracy values
 # Plot training & validation accuracy values
 plt.plot(history.history['accuracy'])
