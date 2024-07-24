@@ -24,3 +24,7 @@ def generate_text(input_text):
 
         # dekode output yang dihasilkan
         output_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        
+        return output_text
+    except Exception as e:
+        return f"Error dalam menghasilkan teks: {str(e)}"
