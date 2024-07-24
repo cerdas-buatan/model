@@ -81,3 +81,7 @@ tokenizer.save_pretrained(model_path)
 
 # Compile model
 model.compile(optimizer=optimizer, loss=compute_loss) 
+
+# Definisikan dataset untuk training 
+dataset = tf.data.Dataset.from_tensor_slices(({"input_ids": input_ids, "attention_mask": attention_masks}, labels))
+dataset = dataset.shuffle(buffer_size=1024).batch(10) 
