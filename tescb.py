@@ -21,3 +21,6 @@ def generate_text(input_text):
 
           # Menghasilkan teks dari model
         outputs = model.generate(input_ids, attention_mask=attention_mask, max_length=64, num_beams=4, early_stopping=True)
+
+        # dekode output yang dihasilkan
+        output_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
