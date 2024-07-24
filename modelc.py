@@ -32,6 +32,11 @@ class Seq2Seq:
         encoder_outputs, state_h, state_c = LSTM(self.emb_dim, return_state=True, name='encoder_lstm')(enc_emb)
         encoder_states = [state_h, state_c]
 
+        encoder_inputs = Input(shape=(self.xseq_len,), name='encoder_inputs')
+        enc_emb = Embedding(self.vocab_size, self.emb_dim, mask_zero=True)(encoder_inputs)
+        encoder_outputs, state_h, state_c = LSTM(self.emb_dim, return_state=True, name='encoder_lstm')(enc_emb)
+        encoder_states = [state_h, state_c]
+
         # Decoder
         decoder_inputs = Input(shape=(self.yseq_len,), name='decoder_inputs')
         dec_emb = Embedding(self.vocab_size, self.emb_dim, mask_zero=True)(decoder_inputs)
@@ -109,3 +114,6 @@ plt.ylabel('Accuracy')
 plt.xlabel('Epoch')
 plt.legend(['Train', 'Validation'], loc='upper left')
 plt.show()
+
+
+
