@@ -40,6 +40,3 @@ for index, row in df.iterrows():
     input_ids = tf.constant(input_ids)
 attention_masks = tf.constant(attention_masks)
 labels = tf.constant(labels)
-
-# Muat model sequence-to-sequence
-model = TFT5ForConditionalGeneration.from_pretrained('t5-small')
