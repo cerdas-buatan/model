@@ -57,3 +57,6 @@ def masked_accuracy(y_true, y_pred):
     mask = tf.cast(tf.not_equal(y_true, tokenizer.pad_token_id), tf.float32)  # Abaikan token padding
     accuracy = tf.cast(accuracy, tf.float32) * mask
     return tf.reduce_sum(accuracy) / tf.reduce_sum(mask)
+
+# Kompilasi model dengan metrik akurasi custom
+model.compile(optimizer=optimizer, loss=compute_loss, metrics=[masked_accuracy])
