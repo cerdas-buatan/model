@@ -21,8 +21,8 @@ df = pd.DataFrame(rows, columns=['question', 'answer'])
 # Mengatasi missing values
 df.dropna(inplace=True)
 
-# Inisialisasi CountVectorizer
-vectorizer = CountVectorizer()
+# Inisialisasi IndoBERT tokenizer
+tokenizer = BertTokenizer.from_pretrained('indobenchmark/indobert-base-p2')
 
 # Gabungkan kolom 'question' dan 'answer' untuk representasi BoW
 combined_texts = df['question'] + " " + df['answer']
