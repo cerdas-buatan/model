@@ -14,7 +14,7 @@ os.makedirs(save_dir, exist_ok=True)
 rows = []
 
 # Read and clean dataset, handling any anomalies
-with open('dataset_clean2.csv', 'r', encoding='utf-8') as file:
+with open('data.csv', 'r', encoding='utf-8') as file:
     for line_number, line in enumerate(file):
         # Pisahkan baris berdasarkan '|'
         parts = line.strip().split('|')
@@ -41,8 +41,8 @@ y = label_encoder.fit_transform(df['answer'])
 X_train_bow, X_test_bow, y_train, y_test = train_test_split(X_bow, y, test_size=0.2, random_state=42)
 
 # Konversi data ke TensorFlow dataset
-train_dataset = tf.data.Dataset.from_tensor_slices((X_train_bow.toarray(), y_train)).batch(10)
-test_dataset = tf.data.Dataset.from_tensor_slices((X_test_bow.toarray(), y_test)).batch(10)
+train_dataset = tf.data.Dataset.from_tensor_slices((X_train_bow.toarray(), y_train)).batch(64)
+test_dataset = tf.data.Dataset.from_tensor_slices((X_test_bow.toarray(), y_test)).batch(64)
 
 
 # Definisikan model Neural Network
@@ -58,7 +58,7 @@ model.compile(optimizer='adam',
               metrics=['accuracy'])
 
 # Latih model
-model.fit(train_dataset, epochs=30)
+model.fit(train_dataset, epochs=50)
 
 # Simpan model, vectorizer, dan label encoder di folder yang ditentukan
 model.save(os.path.join(save_dir, 'nn_model.h5'))

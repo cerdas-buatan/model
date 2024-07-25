@@ -1,3 +1,5 @@
+# file ini untuk bahan kommit bisa
+
 import numpy as np
 from tensorflow.keras.layers import Embedding, LSTM, Dense, Input
 from tensorflow.keras.models import Model
