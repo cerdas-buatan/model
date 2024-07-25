@@ -40,3 +40,10 @@ X_train_bow, X_test_bow, y_train, y_test = train_test_split(X_bow, y, test_size=
 train_dataset = tf.data.Dataset.from_tensor_slices((X_train_bow.toarray(), y_train)).batch(10)
 test_dataset = tf.data.Dataset.from_tensor_slices((X_test_bow.toarray(), y_test)).batch(10)
 
+
+# Definisikan model Neural Network
+model = tf.keras.Sequential([
+    tf.keras.layers.Input(shape=(X_train_bow.shape[1],)),
+    tf.keras.layers.Dense(64, activation='relu'),
+    tf.keras.layers.Dense(len(label_encoder.classes_), activation='softmax')
+])
