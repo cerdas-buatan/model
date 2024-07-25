@@ -6,6 +6,10 @@ import tensorflow as tf
 import joblib
 import os
 
+# Define folder to save model and other files
+save_dir = 'saved_model'
+os.makedirs(save_dir, exist_ok=True)
+
 # Inisialisasi daftar kosong untuk menyimpan baris yang telah dibersihkan
 rows = []
 
@@ -55,3 +59,10 @@ model.compile(optimizer='adam',
 
 # Latih model
 model.fit(train_dataset, epochs=30)
+
+# Simpan model, vectorizer, dan label encoder di folder yang ditentukan
+model.save(os.path.join(save_dir, 'nn_model.h5'))
+joblib.dump(vectorizer, os.path.join(save_dir, 'vectorizer.pkl'))
+joblib.dump(label_encoder, os.path.join(save_dir, 'label_encoder.pkl'))
+
+print(f"Training complete. Model, vectorizer, and label encoder saved in '{save_dir}'.")
