@@ -40,9 +40,6 @@ def evaluate_accuracy(input_text, generated_text):
     # Dalam kasus nyata, ini harus membandingkan teks yang dihasilkan dengan jawaban yang diharapkan.
     return "Akurasi Placeholder"
 
-    # Dalam kasus nyata, ini harus membandingkan teks yang dihasilkan dengan jawaban yang diharapkan.
-    # return "Akurasi Placeholder"
-
 # Penggunaan
 while True:
     input_text = input("Masukkan pertanyaan Anda (atau ketik 'exit' untuk keluar): ")
