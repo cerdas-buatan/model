@@ -1,10 +1,4 @@
 import numpy as np
-
-#from tensorflow.keras.layers import Embedding, LSTM, Dense, Input
-#from tensorflow.keras.models import Model
-#from tensorflow.keras.layers import Embedding, LSTM, Dense, Input
-#from tensorflow.keras.models import Model
-#from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.layers import Embedding, LSTM, Dense, Input
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
