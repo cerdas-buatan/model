@@ -2,7 +2,6 @@ import tensorflow as tf
 from transformers import TFT5ForConditionalGeneration, T5Tokenizer
 import pandas as pd
 
-#import tensorflow as tf
 #from transformers import TFT5ForConditionalGeneration, T5Tokenizer
 #import pandas as pd
 
@@ -68,3 +67,5 @@ while True:
 df = pd.DataFrame(data)
 df.to_excel("hasil_test.xlsx", index=False)
 print("Data berhasil disimpan ke hasil_test.xlsx")
+
+
