@@ -101,6 +101,9 @@ data['question'] = data['question'].astype(str).fillna('')
 data['answer'] = data['answer'].astype(str).fillna('')
 questions, answers = data['question'].values, data['answer'].values
 
+#data = pd.read_csv('dataset_clean2.csv')
+data['question'] = data['question'].astype(str).fillna('')
+data['answer'] = data['answer'].astype(str).fillna('')
 
 # Preprocess the data
 X, y, tokenizer = preprocess_data(questions, answers, xseq_len, yseq_len, num_words)
