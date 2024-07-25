@@ -34,11 +34,7 @@ class Seq2Seq:
         encoder_outputs, state_h, state_c = LSTM(self.emb_dim, return_state=True, name='encoder_lstm')(enc_emb)
         encoder_states = [state_h, state_c]
         encoder_states = [state_h, state_c]
-#        encoder_states = [state_h, state_c]
-#        encoder_states = [state_h, state_c]
 
-        # Decoder
-#
         # Decoder
         decoder_inputs = Input(shape=(self.yseq_len,), name='decoder_inputs')
         dec_emb = Embedding(self.vocab_size, self.emb_dim, mask_zero=True)(decoder_inputs)
