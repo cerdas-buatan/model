@@ -21,6 +21,9 @@ def generate_answer(question):
     # Decode label to original text
     return label_encoder.inverse_transform([predicted_label])[0]
 
+# Collect results
+results = []
+
 # Manual input
 while True:
     user_input = input("Masukan pertanyaan (atau 'exit' untuk keluar ): ")
@@ -28,3 +31,15 @@ while True:
         break
     predicted_answer = generate_answer(user_input)
     print(f'Jawaban: {predicted_answer}')
+
+    # Save result to list
+    results.append({'Pertanyaan': user_input, 'Jawaban': predicted_answer})
+
+# Create a DataFrame from the results
+results_df = pd.DataFrame(results)
+
+# Save results to Excel
+results_file = 'hasil_testing.xlsx'
+results_df.to_excel(results_file, index=False)
+
+print(f"Hasil testing telah di simpan '{results_file}'.")
