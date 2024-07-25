@@ -13,6 +13,7 @@ tokenizer = T5Tokenizer.from_pretrained(model_path)
 
 # Inisialisasi daftar untuk menyimpan pertanyaan, jawaban, dan akurasi
 data = []
+#data = []
 
 # Fungsi menghasilkan teks dari input
 def generate_text(input_text):
