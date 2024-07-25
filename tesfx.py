@@ -1,12 +1,9 @@
-import tensorflow as tf
-from transformers import TFT5ForConditionalGeneration, T5Tokenizer
-import pandas as pd
-import tensorflow as tf
-from transformers import TFT5ForConditionalGeneration, T5Tokenizer
-import pandas as pd
-
+#import tensorflow as tf
 #from transformers import TFT5ForConditionalGeneration, T5Tokenizer
 #import pandas as pd
+import tensorflow as tf
+from transformers import TFT5ForConditionalGeneration, T5Tokenizer
+import pandas as pd
 
 # load model dan tokenizer yang telah dilatih
 model_path = 't5_text_to_text_model'
