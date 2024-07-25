@@ -69,7 +69,6 @@ class Seq2Seq:
         return results
     
 
-#        def evaluate(self, X_test, y_test):
 #        y_test = np.expand_dims(y_test, axis=-1)
 #        results = self.model.evaluate([X_test, y_test[:, :-1]], y_test[:, 1:])
 #        print(f'Test Loss: {results[0]}')
@@ -83,6 +82,11 @@ def preprocess_data(questions, answers, xseq_len, yseq_len, num_words):
     y = pad_sequences(tokenizer.texts_to_sequences(answers), maxlen=yseq_len, padding='post')
     return X, y, tokenizer
 
+
+
+#def preprocess_data(questions, answers, xseq_len, yseq_len, num_words):
+#    tokenizer = Tokenizer(num_words=num_words, oov_token='<OOV>')
+#    tokenizer.fit_on_texts(np.concatenate((questions, answers)))
 
 def preprocess_data(questions, answers, xseq_len, yseq_len, num_words):
     tokenizer = Tokenizer(num_words=num_words, oov_token='<OOV>')
