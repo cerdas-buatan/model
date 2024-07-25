@@ -19,3 +19,11 @@ def generate_answer(question):
     predicted_label = tf.argmax(prediction, axis=1).numpy()[0]
     # Decode label to original text
     return label_encoder.inverse_transform([predicted_label])[0]
+
+# Manual input
+while True:
+    user_input = input("Enter a question (or type 'exit' to quit): ")
+    if user_input.lower() == 'exit':
+        break
+    predicted_answer = generate_answer(user_input)
+    print(f'Predicted answer: {predicted_answer}')
