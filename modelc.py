@@ -24,6 +24,10 @@ class Seq2Seq:
 
         self.build_model()
 
+#        self.xseq_len = xseq_len
+#
+#        self.build_model()
+
     def build_model(self):
         # Encoder
         encoder_inputs = Input(shape=(self.xseq_len,), name='encoder_inputs')
