@@ -33,4 +33,10 @@ X_bow = vectorizer.fit_transform(df['question'])
 label_encoder = LabelEncoder()
 y = label_encoder.fit_transform(df['answer'])
 
+# Bagi dataset menjadi training dan testing set (80% train, 20% test)
+X_train_bow, X_test_bow, y_train, y_test = train_test_split(X_bow, y, test_size=0.2, random_state=42)
+
+# Konversi data ke TensorFlow dataset
+train_dataset = tf.data.Dataset.from_tensor_slices((X_train_bow.toarray(), y_train)).batch(10)
+test_dataset = tf.data.Dataset.from_tensor_slices((X_test_bow.toarray(), y_test)).batch(10)
 
