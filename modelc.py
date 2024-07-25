@@ -2,12 +2,10 @@ import numpy as np
 from tensorflow.keras.layers import Embedding, LSTM, Dense, Input
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
-#from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from sklearn.model_selection import train_test_split
 import os
 import matplotlib.pyplot as plt
-
 
 # Disable oneDNN optimizations warning
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
