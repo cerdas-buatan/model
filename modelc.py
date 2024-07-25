@@ -111,12 +111,9 @@ model = Seq2Seq(xseq_len=xseq_len, yseq_len=yseq_len, vocab_size=num_words, emb_
 history = model.train(X_train, y_train, batch_size=16, epochs=3)
 
 # Evaluate the model
-
-# Evaluate the model
 results = model.evaluate(X_test, y_test)
 
 # Evaluate the model
-
 # Evaluate the model
 results = model.evaluate(X_test, y_test)
 
@@ -128,8 +125,3 @@ plt.ylabel('Accuracy')
 plt.xlabel('Epoch')
 plt.legend(['Train', 'Validation'], loc='upper left')
 plt.show()
-
-
-
-
-
