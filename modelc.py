@@ -77,11 +77,6 @@ def preprocess_data(questions, answers, xseq_len, yseq_len, num_words):
     y = pad_sequences(tokenizer.texts_to_sequences(answers), maxlen=yseq_len, padding='post')
     return X, y, tokenizer
 
-#    X = pad_sequences(tokenizer.texts_to_sequences(questions), maxlen=xseq_len, padding='post')
-#    y = pad_sequences(tokenizer.texts_to_sequences(answers), maxlen=yseq_len, padding='post')
-#    return X, y, tokenizer
-
-
 #    tokenizer.fit_on_texts(np.concatenate((questions, answers)))
 
 def preprocess_data(questions, answers, xseq_len, yseq_len, num_words):
