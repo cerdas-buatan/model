@@ -22,10 +22,10 @@ class Seq2Seq:
 #
 #        self.build_model()
 
-#
-#        self.build_model()
 
+#
     def build_model(self):
+
         # Encoder
         encoder_inputs = Input(shape=(self.xseq_len,), name='encoder_inputs')
         enc_emb = Embedding(self.vocab_size, self.emb_dim, mask_zero=True)(encoder_inputs)
