@@ -24,9 +24,7 @@ class Seq2Seq:
 
         
 #
-#        self.build_model()
-#        self.build_model()
-#        self.build_model()
+
 
 #
     def build_model(self):
