@@ -19,10 +19,7 @@ os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 class Seq2Seq:
     def __init__(self, xseq_len, yseq_len, vocab_size, emb_dim, num_layers):
         self.xseq_len = xseq_len
-#        self.yseq_len = yseq_len
-#        self.vocab_size = vocab_size
-#        self.emb_dim = emb_dim
-#        self.num_layers = num_layers
+
         self.build_model()
 
     def build_model(self):
