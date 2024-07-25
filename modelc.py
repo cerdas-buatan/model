@@ -16,6 +16,13 @@ class Seq2Seq:
 
         self.build_model()
 
+class Seq2Seq:
+    def __init__(self, xseq_len, yseq_len, vocab_size, emb_dim, num_layers):
+        self.xseq_len = xseq_len
+
+        self.build_model()
+
+        
 #
 #        self.build_model()
 #        self.build_model()
