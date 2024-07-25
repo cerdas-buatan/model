@@ -45,6 +45,13 @@ class Seq2Seq:
         decoder_outputs, _, _ = decoder_lstm(dec_emb, initial_state=encoder_states)
         decoder_outputs = Dense(self.vocab_size, activation='softmax', name='decoder_dense')(decoder_outputs)
 
+        # Decoder
+        decoder_inputs = Input(shape=(self.yseq_len,), name='decoder_inputs')
+        dec_emb = Embedding(self.vocab_size, self.emb_dim, mask_zero=True)(decoder_inputs)
+        decoder_lstm = LSTM(self.emb_dim, return_sequences=True, return_state=True, name='decoder_lstm')
+        decoder_outputs, _, _ = decoder_lstm(dec_emb, initial_state=encoder_states)
+        decoder_outputs = Dense(self.vocab_size, activation='softmax', name='decoder_dense')(decoder_outputs)
+
         # Define and compile the model
 #
         # Define and compile the model
