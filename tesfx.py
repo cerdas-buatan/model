@@ -46,6 +46,7 @@ def evaluate_accuracy(input_text, generated_text):
     return "Akurasi Placeholder"
 
 # Penggunaan
+# Penggunaan
 while True:
     input_text = input("Masukkan pertanyaan Anda (atau ketik 'exit' untuk keluar): ")
 
@@ -53,12 +54,16 @@ while True:
         break
 
     # Menghasilkan teks jawaban berdasarkan input
+    # Menghasilkan teks jawaban berdasarkan input
     generated_text = generate_text(input_text)
     print("Jawaban dari model:")
     print(generated_text)
     
     # Mengevaluasi akurasi
     accuracy = evaluate_accuracy(input_text, generated_text)
+
+    # Mengevaluasi akurasi
+    # accuracy = evaluate_accuracy(input_text, generated_text)
 
     # Menyimpan pertanyaan, jawaban, dan akurasi ke dalam daftar data
     data.append({"Pertanyaan": input_text, "Jawaban": generated_text, "Akurasi": accuracy})
