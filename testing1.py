@@ -1,3 +1,4 @@
+import pandas as pd
 import tensorflow as tf
 import joblib
 import os
@@ -22,8 +23,8 @@ def generate_answer(question):
 
 # Manual input
 while True:
-    user_input = input("Enter a question (or type 'exit' to quit): ")
+    user_input = input("Masukan pertanyaan (atau 'exit' untuk keluar ): ")
     if user_input.lower() == 'exit':
         break
     predicted_answer = generate_answer(user_input)
-    print(f'Predicted answer: {predicted_answer}')
+    print(f'Jawaban: {predicted_answer}')
