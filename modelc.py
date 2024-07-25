@@ -47,8 +47,11 @@ class Seq2Seq:
         decoder_outputs = Dense(self.vocab_size, activation='softmax', name='decoder_dense')(decoder_outputs)
 
         # Define and compile the model
+#
+        # Define and compile the model
         self.model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
         self.model.compile(optimizer=Adam(), loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+#       self.model.compile(optimizer=Adam(), loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
     def train(self, X_train, y_train, batch_size, epochs):
         y_train = np.expand_dims(y_train, axis=-1)
