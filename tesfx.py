@@ -37,6 +37,9 @@ def generate_text(input_text):
 # Fungsi mengevaluasi akurasi teks yang dihasilkan (placeholder untuk implementasi sebenarnya)
 def evaluate_accuracy(input_text, generated_text):
 
+# Fungsi mengevaluasi akurasi teks yang dihasilkan (placeholder untuk implementasi sebenarnya)
+#def evaluate_accuracy(input_text, generated_text):
+
 ##
     # Dalam kasus nyata, ini harus membandingkan teks yang dihasilkan dengan jawaban yang diharapkan.
     return "Akurasi Placeholder"
