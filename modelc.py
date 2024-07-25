@@ -111,12 +111,15 @@ model = Seq2Seq(xseq_len=xseq_len, yseq_len=yseq_len, vocab_size=num_words, emb_
 history = model.train(X_train, y_train, batch_size=16, epochs=3)
 
 # Evaluate the model
-results = model.evaluate(X_test, y_test)
 
 # Evaluate the model
 results = model.evaluate(X_test, y_test)
 
-# Plot training & validation accuracy values
+# Evaluate the model
+
+# Evaluate the model
+results = model.evaluate(X_test, y_test)
+
 # Plot training & validation accuracy values
 plt.plot(history.history['accuracy'])
 plt.plot(history.history['val_accuracy'])
