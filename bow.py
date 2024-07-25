@@ -1,8 +1,10 @@
 import pandas as pd
-import tensorflow as tf
-from transformers import TFBertForSequenceClassification, BertTokenizer, create_optimizer
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report
+import tensorflow as tf
+import joblib
+import os
 
 # Inisialisasi daftar kosong untuk menyimpan baris yang telah dibersihkan
 rows = []
@@ -21,8 +23,8 @@ df = pd.DataFrame(rows, columns=['question', 'answer'])
 # Mengatasi missing values
 df.dropna(inplace=True)
 
-# Inisialisasi IndoBERT tokenizer
-tokenizer = BertTokenizer.from_pretrained('indobenchmark/indobert-base-p2')
+# Inisialisasi CountVectorizer
+vectorizer = CountVectorizer()
 
 # Gabungkan kolom 'question' dan 'answer' untuk representasi BoW
 combined_texts = df['question'] + " " + df['answer']
