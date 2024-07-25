@@ -1,6 +1,8 @@
-# import yang di butuhkan
 import pandas as pd
-from sklearn.feature_extraction.text import CountVectorizer
+import tensorflow as tf
+from transformers import TFBertForSequenceClassification, BertTokenizer, create_optimizer
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, classification_report
 
 # Inisialisasi daftar kosong untuk menyimpan baris yang telah dibersihkan
 rows = []
