@@ -37,15 +37,11 @@ def generate_text(input_text):
         return f"Error dalam menghasilkan teks: {str(e)}"
 
 # Fungsi mengevaluasi akurasi teks yang dihasilkan (placeholder untuk implementasi sebenarnya)
-# Fungsi mengevaluasi akurasi teks yang dihasilkan (placeholder untuk implementasi sebenarnya)
 def evaluate_accuracy(input_text, generated_text):
 
-
-    # Untuk kesederhanaan, kita mengembalikan nilai akurasi placeholder.
     # Dalam kasus nyata, ini harus membandingkan teks yang dihasilkan dengan jawaban yang diharapkan.
     return "Akurasi Placeholder"
 
-# Penggunaan
 # Penggunaan
 while True:
     input_text = input("Masukkan pertanyaan Anda (atau ketik 'exit' untuk keluar): ")
