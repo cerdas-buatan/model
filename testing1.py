@@ -43,4 +43,3 @@ results_file = 'hasil_testing.xlsx'
 results_df.to_excel(results_file, index=False)
 
 print(f"Hasil testing telah di simpan '{results_file}'.")
-# print(f"Hasil testing telah di simpan '{results_file}'.")
