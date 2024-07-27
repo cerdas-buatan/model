@@ -1,3 +1,13 @@
-.h5
-.pkl
-.xlsx
+# Ignore HDF5 files (saved models in H5 format)
+*.h5
+
+# Ignore pickle files (label encoder and other Python serialized objects)
+*.pkl
+*.keras
+
+# Ignore Excel files (results of testing)
+*.xlsx
+
+# Ignore specific directories or files if needed
+save_model/
+saved_model/
