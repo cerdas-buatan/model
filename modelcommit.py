@@ -53,8 +53,8 @@ X_combined = np.concatenate([X_bert_embeddings, X_bow.toarray()], axis=1)
 X_train, X_test, y_train, y_test = train_test_split(X_combined, y, test_size=0.2, random_state=42)
 
 # Create TensorFlow datasets
-train_dataset = tf.data.Dataset.from_tensor_slices((X_train, y_train)).batch(64).cache().prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
-test_dataset = tf.data.Dataset.from_tensor_slices((X_test, y_test)).batch(64).cache().prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
+train_dataset = tf.data.Dataset.from_tensor_slices((X_train, y_train)).batch(128).cache().prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
+test_dataset = tf.data.Dataset.from_tensor_slices((X_test, y_test)).batch(128).cache().prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
 
 # Set TensorFlow threading configurations
 tf.config.threading.set_inter_op_parallelism_threads(4)
