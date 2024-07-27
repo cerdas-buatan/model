@@ -1,5 +1,4 @@
 # model
 Model untuk melakukan latihan data, validasi data, testing data untuk menghasilkan akurasi atau presisi pada dataset yang diperoleh.
-model ini masih tahap pengembangan, jadi masih coba-coba.
-percobaan buat arsitektur model menggunakan seqinbert.
-Seqinbert singkatan dari dua model seqseq dan indobert
+
+model yang digunakan yaitu NN(Neurol Network). karena model indobert cukup berat pada saat proses training jadi pake nn supaya meringankan dan cepat dalam proses training.
