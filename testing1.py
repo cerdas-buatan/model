@@ -26,7 +26,6 @@ results = []
 
 # Manual input
 while True:
-# while True:
     user_input = input("Masukan pertanyaan (atau 'exit' untuk keluar ): ")
     if user_input.lower() == 'exit':
         break
