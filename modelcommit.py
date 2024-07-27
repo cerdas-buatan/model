@@ -4,16 +4,18 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import CountVectorizer
 import tensorflow as tf
-from transformers import BertTokenizer, TFBertModel
+from transformers import DistilBertTokenizer, TFDistilBertModel
 import joblib
 import os
 
 # Define folder to save model and other files
-save_dir = 'save_model'
+save_dir = 'saved_model'
 os.makedirs(save_dir, exist_ok=True)
 
-# Read and clean dataset
+# Initialize list to store cleaned rows
 rows = []
+
+# Read and clean dataset
 with open('data.csv', 'r', encoding='utf-8') as file:
     for line in file:
         parts = line.strip().split('|')
@@ -31,9 +33,9 @@ X_bow = vectorizer.fit_transform(df['question'])
 label_encoder = LabelEncoder()
 y = label_encoder.fit_transform(df['answer'])
 
-# Load BERT tokenizer and model
-tokenizer = BertTokenizer.from_pretrained('indobert-base')
-distilbert = TFBertModel.from_pretrained('indobert-base')
+# Load tokenizer and model
+tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
+distilbert = TFDistilBertModel.from_pretrained('distilbert-base-uncased')
 
 # Function to get BERT embeddings
 def get_bert_embeddings(texts):
