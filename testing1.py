@@ -1,3 +1,4 @@
+# import yang di butuhkan
 import pandas as pd
 import tensorflow as tf
 import joblib
