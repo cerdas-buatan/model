@@ -7,7 +7,7 @@ import joblib
 import os
 
 # Define folder to save model and other files
-save_dir = 'saved_model'
+save_dir = 'save_model'
 os.makedirs(save_dir, exist_ok=True)
 
 # Inisialisasi daftar kosong untuk menyimpan baris yang telah dibersihkan
@@ -41,8 +41,8 @@ y = label_encoder.fit_transform(df['answer'])
 X_train_bow, X_test_bow, y_train, y_test = train_test_split(X_bow, y, test_size=0.2, random_state=42)
 
 # Konversi data ke TensorFlow dataset
-train_dataset = tf.data.Dataset.from_tensor_slices((X_train_bow.toarray(), y_train)).batch(64)
-test_dataset = tf.data.Dataset.from_tensor_slices((X_test_bow.toarray(), y_test)).batch(64)
+train_dataset = tf.data.Dataset.from_tensor_slices((X_train_bow.toarray(), y_train)).batch(128)
+test_dataset = tf.data.Dataset.from_tensor_slices((X_test_bow.toarray(), y_test)).batch(128)
 
 
 # Definisikan model Neural Network
