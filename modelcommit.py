@@ -11,78 +11,76 @@ import json
 save_dir = 'save_model'
 os.makedirs(save_dir, exist_ok=True)
 
-# Initialize an empty list to store cleaned rows
+# Inisialisasi daftar kosong untuk menyimpan baris yang telah dibersihkan
 rows = []
 
 # Read and clean dataset, handling any anomalies
 with open('data.csv', 'r', encoding='utf-8') as file:
     for line_number, line in enumerate(file):
-        # Split line based on '|'
+        # Pisahkan baris berdasarkan '|'
         parts = line.strip().split('|')
-        if len(parts) == 2:  # Only process lines with exactly two parts
+        if len(parts) == 2:  # Hanya memproses baris dengan tepat dua bagian
             rows.append(parts)
 
-# Convert cleaned rows to DataFrame
+# Konversi baris yang telah dibersihkan ke DataFrame
 df = pd.DataFrame(rows, columns=['question', 'answer'])
 
-# Handle missing values
+# Mengatasi missing values
 df.dropna(inplace=True)
 
-# Initialize CountVectorizer
+# Inisialisasi CountVectorizer
 vectorizer = CountVectorizer()
 
-# Fit and transform text to BoW
+# Fit dan transform teks ke BoW
 X_bow = vectorizer.fit_transform(df['question'])
 
-# Use 'answer' column as labels
+# Menggunakan kolom 'answer' sebagai label
 label_encoder = LabelEncoder()
 y = label_encoder.fit_transform(df['answer'])
 
-# Split dataset into training and testing sets (80% train, 20% test)
+# Bagi dataset menjadi training dan testing set (80% train, 20% test)
 X_train_bow, X_test_bow, y_train, y_test = train_test_split(X_bow, y, test_size=0.2, random_state=42)
 
-# Convert data to TensorFlow dataset
+# Konversi data ke TensorFlow dataset
 train_dataset = tf.data.Dataset.from_tensor_slices((X_train_bow.toarray(), y_train)).batch(128)
 test_dataset = tf.data.Dataset.from_tensor_slices((X_test_bow.toarray(), y_test)).batch(128)
 
-# Define Neural Network model
+# Definisikan model Neural Network
 model = tf.keras.Sequential([
     tf.keras.layers.Input(shape=(X_train_bow.shape[1],)),
     tf.keras.layers.Dense(64, activation='relu'),
     tf.keras.layers.Dense(len(label_encoder.classes_), activation='softmax')
 ])
 
-# Compile model
+# Kompilasi model
 model.compile(optimizer='adam',
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
 
-# Train model
-history = model.fit(train_dataset, epochs=100)
+# Latih model
+model.fit(train_dataset, epochs=100)
 
-# Save model, vectorizer, and label encoder in the specified folder
+# Simpan model, vectorizer, dan label encoder di folder yang ditentukan
 model.save(os.path.join(save_dir, 'nn_model.h5'))
 joblib.dump(vectorizer, os.path.join(save_dir, 'vectorizer.pkl'))
 joblib.dump(label_encoder, os.path.join(save_dir, 'label_encoder.pkl'))
 
-# Prepare JSON output
-output_data = {
-    "model_details": {
-        "input_shape": X_train_bow.shape[1],
-        "layers": [
-            {"type": "Dense", "units": 64, "activation": "relu"},
-            {"type": "Dense", "units": len(label_encoder.classes_), "activation": "softmax"}
-        ],
-        "optimizer": "adam",
-        "loss": "sparse_categorical_crossentropy",
-        "metrics": ["accuracy"]
-    },
-    "training_history": history.history,
-    "classes": label_encoder.classes_.tolist()
-}
+print(f"Training complete. Model, vectorizer, and label encoder saved in '{save_dir}'.")
 
-# Save JSON output
-with open(os.path.join(save_dir, 'gaysdisal.json'), 'w') as json_file:
-    json.dump(output_data, json_file)
+# Predict on test data
+predictions = model.predict(test_dataset)
+predicted_labels = label_encoder.inverse_transform(tf.argmax(predictions, axis=1).numpy())
 
-print(f"Training complete. Model, vectorizer, and label encoder saved in '{save_dir}'. JSON output saved in 'gaysdisal.json'.")
+# Create JSON output for MongoDB
+output = []
+for idx, (question, answer) in enumerate(zip(df['question'], df['answer'])):
+    output.append({
+        "_id": {"$oid": str(idx).zfill(24)},
+        "message": question + " | " + predicted_labels[idx]
+    })
+
+# Save output to JSON file
+with open('gaysdisal.json', 'w', encoding='utf-8') as f:
+    json.dump(output, f, ensure_ascii=False, indent=4)
+
+print(f"Output JSON saved to 'gaysdisal.json'")
