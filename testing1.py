@@ -4,43 +4,43 @@ import tensorflow as tf
 import joblib
 import os
 
-# Define folder to load model and other files
+# Tentukan folder untuk memuat model dan file lainnya
 save_dir = 'saved_model'
 
-# Load model, vectorizer, and label encoder
+# Muat model, vektorizer, dan label encoder
 model = tf.keras.models.load_model(os.path.join(save_dir, 'nn_model.h5'))
 vectorizer = joblib.load(os.path.join(save_dir, 'vectorizer.pkl'))
 label_encoder = joblib.load(os.path.join(save_dir, 'label_encoder.pkl'))
 
-# Predict function
+# Fungsi untuk menghasilkan jawaban
 def generate_answer(question):
-    # Transform question to BoW
+    # Transformasi pertanyaan ke BoW
     question_bow = vectorizer.transform([question]).toarray()
-    # Predict with the model
+    # Prediksi dengan model
     prediction = model.predict(question_bow)
     predicted_label = tf.argmax(prediction, axis=1).numpy()[0]
-    # Decode label to original text
+    # Decode label ke teks asli
     return label_encoder.inverse_transform([predicted_label])[0]
 
-# Collect results
+# Kumpulkan hasil
 results = []
 
-# Manual input
+# Input manual
 while True:
-    user_input = input("Masukan pertanyaan (atau 'exit' untuk keluar ): ")
+    user_input = input("Masukkan pertanyaan (atau 'exit' untuk keluar): ")
     if user_input.lower() == 'exit':
         break
     predicted_answer = generate_answer(user_input)
     print(f'Jawaban: {predicted_answer}')
 
-    # Save result to list
+    # Simpan hasil ke dalam daftar
     results.append({'Pertanyaan': user_input, 'Jawaban': predicted_answer})
 
-# Create a DataFrame from the results
+# Buat DataFrame dari hasil
 results_df = pd.DataFrame(results)
 
-# Save results to Excel
+# Simpan hasil ke Excel
 results_file = 'hasil_testing.xlsx'
 results_df.to_excel(results_file, index=False)
 
-print(f"Hasil testing telah di simpan '{results_file}'.")
+print(f"Hasil testing telah disimpan di '{results_file}'.")
