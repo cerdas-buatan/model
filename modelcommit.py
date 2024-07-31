@@ -8,7 +8,7 @@ import os
 import json
 
 # Define folder to save model and other files
-save_dir = 'save_model2'
+save_dir = 'save_model'
 os.makedirs(save_dir, exist_ok=True)
 
 # Inisialisasi daftar kosong untuk menyimpan baris yang telah dibersihkan
@@ -68,15 +68,15 @@ joblib.dump(label_encoder, os.path.join(save_dir, 'label_encoder.pkl'))
 print(f"Training complete. Model, vectorizer, and label encoder saved in '{save_dir}'.")
 
 # Predict on test data
-predictions = model.predict(test_dataset)
+predictions = model.predict(X_test_bow.toarray())
 predicted_labels = label_encoder.inverse_transform(tf.argmax(predictions, axis=1).numpy())
 
 # Create JSON output for MongoDB
 output = []
-for idx, (question, answer) in enumerate(zip(df['question'], df['answer'])):
+for idx, (question, answer) in enumerate(zip(df['question'].iloc[X_test_bow.indices], predicted_labels)):
     output.append({
         "_id": {"$oid": str(idx).zfill(24)},
-        "message": question + " | " + predicted_labels[idx]
+        "message": question + " | " + answer
     })
 
 # Save output to JSON file
