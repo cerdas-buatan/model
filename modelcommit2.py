@@ -32,10 +32,6 @@ df.dropna(inplace=True)
 # Remove duplicates
 df.drop_duplicates(inplace=True)
 
-# Apply text preprocessing
-df['question'] = df['question'].apply(preprocess_text)
-df['answer'] = df['answer'].apply(preprocess_text)
-
 # Inisialisasi CountVectorizer
 vectorizer = CountVectorizer()
 
