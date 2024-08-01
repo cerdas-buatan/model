@@ -6,6 +6,7 @@ import tensorflow as tf
 import joblib
 import os
 import json
+import re
 
 # Define folder to save model and other files
 save_dir = 'save_model'
@@ -27,6 +28,23 @@ df = pd.DataFrame(rows, columns=['question', 'answer'])
 
 # Mengatasi missing values
 df.dropna(inplace=True)
+
+# Remove duplicates
+df.drop_duplicates(inplace=True)
+
+# Text preprocessing function
+def preprocess_text(text):
+    # Convert text to lowercase
+    text = text.lower()
+    # Remove punctuation and numbers
+    text = re.sub(r'[^a-z\s]', '', text)
+    # Strip leading and trailing whitespace
+    text = text.strip()
+    return text
+
+# Apply text preprocessing
+df['question'] = df['question'].apply(preprocess_text)
+df['answer'] = df['answer'].apply(preprocess_text)
 
 # Inisialisasi CountVectorizer
 vectorizer = CountVectorizer()
