@@ -77,7 +77,7 @@ model.compile(optimizer='adam',
               metrics=['accuracy'])
 
 # Latih model
-model.fit(train_dataset, epochs=64)
+model.fit(train_dataset, epochs=100)
 
 # Simpan model, vectorizer, dan label encoder di folder yang ditentukan
 model.save(os.path.join(save_dir, 'nn_model.h5'))
@@ -95,7 +95,8 @@ output = []
 for question, answer in zip(df['question'].iloc[X_test_bow.indices], predicted_labels):
     output.append({
         "_id": {"$oid": str(uuid.uuid4())},
-        "message": question + " | " + answer
+        "question": question,
+        "predicted_answer": answer
     })
 
 # Save output to JSON file
@@ -103,26 +104,3 @@ with open('gaysdisal.json', 'w', encoding='utf-8') as f:
     json.dump(output, f, ensure_ascii=False, indent=4)
 
 print(f"Output JSON saved to 'gaysdisal.json'")
-
-# Load the model, vectorizer, and label encoder
-model = tf.keras.models.load_model(os.path.join(save_dir, 'nn_model.h5'))
-vectorizer = joblib.load(os.path.join(save_dir, 'vectorizer.pkl'))
-label_encoder = joblib.load(os.path.join(save_dir, 'label_encoder.pkl'))
-
-def bot_answer(question):
-    # Preprocess the question
-    processed_question = preprocess_text(question)
-    
-    # Convert question to BoW representation
-    question_bow = vectorizer.transform([processed_question])
-    
-    # Predict the answer
-    prediction = model.predict(question_bow.toarray())
-    predicted_label = label_encoder.inverse_transform([tf.argmax(prediction, axis=1).numpy()[0]])
-    
-    return predicted_label[0]
-
-# Example usage
-# input_question = "your sample question here"
-# response = bot_answer(input_question)
-# print(f"Bot answer: {response}")
