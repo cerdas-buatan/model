@@ -9,7 +9,7 @@ import json
 import re
 
 # Define folder to save model and other files
-save_dir = 'save_model'
+save_dir = 'save_model2'
 os.makedirs(save_dir, exist_ok=True)
 
 # Inisialisasi daftar kosong untuk menyimpan baris yang telah dibersihkan
