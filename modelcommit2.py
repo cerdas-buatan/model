@@ -77,7 +77,7 @@ model.compile(optimizer='adam',
               metrics=['accuracy'])
 
 # Latih model
-model.fit(train_dataset, epochs=100)
+model.fit(train_dataset, epochs=64)
 
 # Simpan model, vectorizer, dan label encoder di folder yang ditentukan
 model.save(os.path.join(save_dir, 'nn_model.h5'))
