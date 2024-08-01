@@ -33,16 +33,6 @@ df.dropna(inplace=True)
 # Remove duplicates
 df.drop_duplicates(inplace=True)
 
-# Text preprocessing function
-def preprocess_text(text):
-    # Convert text to lowercase
-    text = text.lower()
-    # Remove punctuation and numbers
-    text = re.sub(r'[^a-z\s]', '', text)
-    # Strip leading and trailing whitespace
-    text = text.strip()
-    return text
-
 # Apply text preprocessing
 df['question'] = df['question'].apply(preprocess_text)
 df['answer'] = df['answer'].apply(preprocess_text)
