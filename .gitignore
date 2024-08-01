@@ -1,6 +1,7 @@
 # Ignore HDF5 files (saved models in H5 format)
 *.h5
 *.hdf5
+*.json
 
 # Ignore pickle files (label encoder and other Python serialized objects)
 *.pkl
@@ -11,4 +12,5 @@
 
 # Ignore specific directories or files if needed
 save_model/
+save_mode2/
 saved_model/
