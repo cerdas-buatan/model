@@ -1,11 +1,13 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
 import tensorflow as tf
 import joblib
 import os
 import json
 import re
 from transformers import BertTokenizer, TFBertModel
+import uuid
 
 # Define folder to save model and other files
 save_dir = 'save_model2'
@@ -96,9 +98,9 @@ predicted_labels = label_encoder.inverse_transform(tf.argmax(predictions, axis=1
 
 # Create JSON output for MongoDB
 output = []
-for idx, (question, answer) in enumerate(zip(df['question'].iloc[X_test.indices], predicted_labels)):
+for question, answer in zip(df['question'].iloc[X_test.indices], predicted_labels):
     output.append({
-        "_id": {"$oid": str(idx).zfill(24)},
+        "_id": {"$oid": str(uuid.uuid4())},
         "message": question + " | " + answer
     })
 
