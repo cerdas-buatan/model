@@ -5,7 +5,7 @@ import joblib
 import os
 
 # Tentukan folder untuk memuat model dan file lainnya
-save_dir = 'saved_model'
+save_dir = 'save_model2'
 
 # Muat model, vektorizer, dan label encoder
 model = tf.keras.models.load_model(os.path.join(save_dir, 'nn_model.h5'))
