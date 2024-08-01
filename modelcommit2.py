@@ -1,12 +1,12 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
 import tensorflow as tf
 import joblib
 import os
 import json
 import re
-from transformers import BertTokenizer, TFBertModel
 import uuid
 
 # Define folder to save model and other files
@@ -47,58 +47,52 @@ def preprocess_text(text):
 df['question'] = df['question'].apply(preprocess_text)
 df['answer'] = df['answer'].apply(preprocess_text)
 
-# Load IndoBERT model and tokenizer
-tokenizer = BertTokenizer.from_pretrained('indobenchmark/indobert-base-p1')
-indobert = TFBertModel.from_pretrained('indobenchmark/indobert-base-p1')
+# Inisialisasi CountVectorizer
+vectorizer = CountVectorizer()
 
-# Tokenize the text data
-def tokenize_text(texts, max_length=128):
-    return tokenizer(texts.tolist(), padding='max_length', truncation=True, max_length=max_length, return_tensors='tf')
+# Fit dan transform teks ke BoW
+X_bow = vectorizer.fit_transform(df['question'])
 
-tokens = tokenize_text(df['question'])
-
-# Extract embeddings from IndoBERT
-embeddings = indobert(tokens['input_ids'], attention_mask=tokens['attention_mask'])[0]
-
-# Use the CLS token embeddings (first token) for classification
-X = embeddings[:, 0, :]
-
-# Encode labels
+# Menggunakan kolom 'answer' sebagai label
 label_encoder = LabelEncoder()
 y = label_encoder.fit_transform(df['answer'])
 
-# Split data into training and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Bagi dataset menjadi training dan testing set (80% train, 20% test)
+X_train_bow, X_test_bow, y_train, y_test = train_test_split(X_bow, y, test_size=0.2, random_state=42)
 
-# Define Neural Network model
+# Konversi data ke TensorFlow dataset
+train_dataset = tf.data.Dataset.from_tensor_slices((X_train_bow.toarray(), y_train)).batch(128)
+test_dataset = tf.data.Dataset.from_tensor_slices((X_test_bow.toarray(), y_test)).batch(128)
+
+# Definisikan model Neural Network
 model = tf.keras.Sequential([
-    tf.keras.layers.Input(shape=(X_train.shape[1],)),
+    tf.keras.layers.Input(shape=(X_train_bow.shape[1],)),
     tf.keras.layers.Dense(64, activation='relu'),
     tf.keras.layers.Dense(len(label_encoder.classes_), activation='softmax')
 ])
 
-# Compile model
+# Kompilasi model
 model.compile(optimizer='adam',
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
 
-# Train model
-model.fit(X_train, y_train, epochs=10, batch_size=32, validation_split=0.1)
+# Latih model
+model.fit(train_dataset, epochs=100)
 
-# Save model, tokenizer, and label encoder
+# Simpan model, vectorizer, dan label encoder di folder yang ditentukan
 model.save(os.path.join(save_dir, 'nn_model.h5'))
-joblib.dump(tokenizer, os.path.join(save_dir, 'tokenizer.pkl'))
+joblib.dump(vectorizer, os.path.join(save_dir, 'vectorizer.pkl'))
 joblib.dump(label_encoder, os.path.join(save_dir, 'label_encoder.pkl'))
 
-print(f"Training complete. Model, tokenizer, and label encoder saved in '{save_dir}'.")
+print(f"Training complete. Model, vectorizer, and label encoder saved in '{save_dir}'.")
 
 # Predict on test data
-predictions = model.predict(X_test)
+predictions = model.predict(X_test_bow.toarray())
 predicted_labels = label_encoder.inverse_transform(tf.argmax(predictions, axis=1).numpy())
 
 # Create JSON output for MongoDB
 output = []
-for question, answer in zip(df['question'].iloc[X_test.indices], predicted_labels):
+for question, answer in zip(df['question'].iloc[X_test_bow.indices], predicted_labels):
     output.append({
         "_id": {"$oid": str(uuid.uuid4())},
         "message": question + " | " + answer
